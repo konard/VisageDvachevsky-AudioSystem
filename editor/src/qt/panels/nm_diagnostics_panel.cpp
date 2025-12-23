@@ -1,6 +1,9 @@
 #include "NovelMind/editor/qt/panels/nm_diagnostics_panel.hpp"
 #include "NovelMind/editor/qt/qt_event_bus.hpp"
 
+#include <QApplication>
+#include <QClipboard>
+#include <QMenu>
 #include <QPushButton>
 #include <QToolBar>
 #include <QTreeWidget>
@@ -11,11 +14,26 @@ namespace NovelMind::editor::qt {
 NMDiagnosticsPanel::NMDiagnosticsPanel(QWidget *parent)
     : NMDockPanel("Diagnostics", parent) {}
 
-NMDiagnosticsPanel::~NMDiagnosticsPanel() = default;
+NMDiagnosticsPanel::~NMDiagnosticsPanel() {
+  NovelMind::editor::ErrorReporter::instance().removeListener(this);
+}
 
-void NMDiagnosticsPanel::onInitialize() { setupUI(); }
+void NMDiagnosticsPanel::onInitialize() {
+  setupUI();
+  // Register as listener to ErrorReporter
+  NovelMind::editor::ErrorReporter::instance().addListener(this);
 
-void NMDiagnosticsPanel::onShutdown() {}
+  // Load existing diagnostics
+  auto diagnostics =
+      NovelMind::editor::ErrorReporter::instance().getAllDiagnostics();
+  for (const auto &diag : diagnostics) {
+    addDiagnosticToTree(diag);
+  }
+}
+
+void NMDiagnosticsPanel::onShutdown() {
+  NovelMind::editor::ErrorReporter::instance().removeListener(this);
+}
 
 void NMDiagnosticsPanel::setupUI() {
   QVBoxLayout *layout = new QVBoxLayout(contentWidget());
@@ -37,6 +55,7 @@ void NMDiagnosticsPanel::setupUI() {
 
   m_diagnosticsTree = new QTreeWidget(contentWidget());
   m_diagnosticsTree->setHeaderLabels({"Type", "Message", "File", "Line"});
+  m_diagnosticsTree->setContextMenuPolicy(Qt::CustomContextMenu);
   layout->addWidget(m_diagnosticsTree, 1);
 
   // Enable double-click to navigate
@@ -50,6 +69,28 @@ void NMDiagnosticsPanel::setupUI() {
             QString location = item->data(0, Qt::UserRole).toString();
             if (!location.isEmpty()) {
               emit diagnosticActivated(location);
+            }
+          });
+
+  // Context menu for copying suggestions
+  connect(m_diagnosticsTree, &QTreeWidget::customContextMenuRequested, this,
+          [this](const QPoint &pos) {
+            QTreeWidgetItem *item = m_diagnosticsTree->itemAt(pos);
+            if (!item) {
+              return;
+            }
+
+            // Check if this is a suggestion item
+            QString itemType = item->data(0, Qt::UserRole + 1).toString();
+            if (itemType == "suggestion") {
+              QMenu menu(m_diagnosticsTree);
+              QAction *copyAction = menu.addAction("Copy Suggestion");
+              connect(copyAction, &QAction::triggered, this, [item]() {
+                QString suggestionText =
+                    item->data(0, Qt::UserRole + 2).toString();
+                QApplication::clipboard()->setText(suggestionText);
+              });
+              menu.exec(m_diagnosticsTree->viewport()->mapToGlobal(pos));
             }
           });
 
@@ -72,6 +113,7 @@ void NMDiagnosticsPanel::setupUI() {
     applyTypeFilter();
   });
 
+  // Keep backward compatibility with QtEventBus
   auto &bus = QtEventBus::instance();
   connect(&bus, &QtEventBus::errorOccurred, this,
           [this](const QString &message, const QString &details) {
@@ -92,6 +134,178 @@ void NMDiagnosticsPanel::setupUI() {
 
 void NMDiagnosticsPanel::onUpdate([[maybe_unused]] double deltaTime) {}
 
+// IDiagnosticListener interface
+void NMDiagnosticsPanel::onDiagnosticAdded(
+    const NovelMind::editor::Diagnostic &diagnostic) {
+  addDiagnosticToTree(diagnostic);
+}
+
+void NMDiagnosticsPanel::onAllDiagnosticsCleared() { clearDiagnostics(); }
+
+// Helper methods
+void NMDiagnosticsPanel::addDiagnosticToTree(
+    const NovelMind::editor::Diagnostic &diag) {
+  if (!m_diagnosticsTree) {
+    return;
+  }
+
+  QTreeWidgetItem *item = createDiagnosticItem(diag);
+  if (!item) {
+    return;
+  }
+
+  // Add related info as children
+  createRelatedInfoItems(item, diag);
+
+  // Add suggestions as children
+  createSuggestionItems(item, diag);
+
+  applyTypeFilter();
+}
+
+QTreeWidgetItem *NMDiagnosticsPanel::createDiagnosticItem(
+    const NovelMind::editor::Diagnostic &diag) {
+  auto *item = new QTreeWidgetItem(m_diagnosticsTree);
+
+  QString typeStr = diagnosticTypeString(diag);
+  item->setText(0, typeStr);
+  item->setText(1, QString::fromStdString(diag.message));
+
+  // Set file and line from location
+  if (diag.location.isValid()) {
+    item->setText(2, QString::fromStdString(diag.location.file));
+    item->setText(3, QString::number(diag.location.line));
+
+    // Store location for navigation
+    QString location = locationString(diag.location);
+    item->setData(0, Qt::UserRole, location);
+  } else {
+    item->setText(2, QString("-"));
+    item->setText(3, QString("-"));
+  }
+
+  // Set severity color
+  QColor color = severityColor(diag.severity);
+  item->setForeground(0, QBrush(color));
+
+  // Store item type for filtering
+  item->setData(0, Qt::UserRole + 1, "diagnostic");
+
+  return item;
+}
+
+void NMDiagnosticsPanel::createRelatedInfoItems(
+    QTreeWidgetItem *parent, const NovelMind::editor::Diagnostic &diag) {
+  if (diag.relatedInfo.empty()) {
+    return;
+  }
+
+  for (const auto &related : diag.relatedInfo) {
+    auto *relatedItem = new QTreeWidgetItem(parent);
+    relatedItem->setText(0, "Related");
+    relatedItem->setText(1, QString::fromStdString(related.message));
+
+    if (related.location.isValid()) {
+      relatedItem->setText(2, QString::fromStdString(related.location.file));
+      relatedItem->setText(3, QString::number(related.location.line));
+
+      // Store location for navigation
+      QString location = locationString(related.location);
+      relatedItem->setData(0, Qt::UserRole, location);
+    } else {
+      relatedItem->setText(2, QString("-"));
+      relatedItem->setText(3, QString("-"));
+    }
+
+    // Style related items with a lighter color
+    relatedItem->setForeground(0, QBrush(QColor("#9e9e9e")));
+    relatedItem->setData(0, Qt::UserRole + 1, "related");
+  }
+}
+
+void NMDiagnosticsPanel::createSuggestionItems(
+    QTreeWidgetItem *parent, const NovelMind::editor::Diagnostic &diag) {
+  if (diag.fixes.empty()) {
+    return;
+  }
+
+  for (const auto &fix : diag.fixes) {
+    auto *suggestionItem = new QTreeWidgetItem(parent);
+    suggestionItem->setText(0, "Suggestion");
+    suggestionItem->setText(1, QString::fromStdString(fix.title));
+
+    if (!fix.description.empty()) {
+      suggestionItem->setToolTip(1, QString::fromStdString(fix.description));
+    }
+
+    if (fix.range.isValid()) {
+      suggestionItem->setText(2, QString::fromStdString(fix.range.file));
+      suggestionItem->setText(3, QString::number(fix.range.line));
+    } else {
+      suggestionItem->setText(2, QString("-"));
+      suggestionItem->setText(3, QString("-"));
+    }
+
+    // Style suggestion items with a green color
+    suggestionItem->setForeground(0, QBrush(QColor("#4caf50")));
+
+    // Store suggestion info for copying
+    suggestionItem->setData(0, Qt::UserRole + 1, "suggestion");
+    suggestionItem->setData(0, Qt::UserRole + 2,
+                            QString::fromStdString(fix.replacementText));
+  }
+}
+
+QString NMDiagnosticsPanel::diagnosticTypeString(
+    const NovelMind::editor::Diagnostic &diag) const {
+  switch (diag.severity) {
+  case NovelMind::editor::DiagnosticSeverity::Fatal:
+    return "Error";
+  case NovelMind::editor::DiagnosticSeverity::Error:
+    return "Error";
+  case NovelMind::editor::DiagnosticSeverity::Warning:
+    return "Warning";
+  case NovelMind::editor::DiagnosticSeverity::Info:
+    return "Info";
+  case NovelMind::editor::DiagnosticSeverity::Hint:
+    return "Hint";
+  default:
+    return "Unknown";
+  }
+}
+
+QColor NMDiagnosticsPanel::severityColor(
+    NovelMind::editor::DiagnosticSeverity severity) const {
+  switch (severity) {
+  case NovelMind::editor::DiagnosticSeverity::Fatal:
+    return QColor("#d32f2f"); // Dark red
+  case NovelMind::editor::DiagnosticSeverity::Error:
+    return QColor("#f44336"); // Red
+  case NovelMind::editor::DiagnosticSeverity::Warning:
+    return QColor("#ff9800"); // Orange
+  case NovelMind::editor::DiagnosticSeverity::Info:
+    return QColor("#64b5f6"); // Blue
+  case NovelMind::editor::DiagnosticSeverity::Hint:
+    return QColor("#9e9e9e"); // Grey
+  default:
+    return QColor("#9e9e9e");
+  }
+}
+
+QString NMDiagnosticsPanel::locationString(
+    const NovelMind::editor::SourceLocation &loc) const {
+  if (!loc.isValid()) {
+    return QString();
+  }
+
+  QString location = QString("Script:%1:%2:%3")
+                         .arg(QString::fromStdString(loc.file))
+                         .arg(loc.line)
+                         .arg(loc.column);
+  return location;
+}
+
+// Legacy methods for backward compatibility
 void NMDiagnosticsPanel::addDiagnostic(const QString &type,
                                        const QString &message,
                                        const QString &file, int line) {
