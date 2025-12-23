@@ -37,6 +37,21 @@ public:
    */
   void refresh();
 
+  /**
+   * @brief Set filter text for searching objects
+   */
+  void setFilterText(const QString &text);
+
+  /**
+   * @brief Set type filter
+   */
+  void setTypeFilter(int typeIndex); // -1 = all, or NMSceneObjectType enum value
+
+  /**
+   * @brief Set tag filter
+   */
+  void setTagFilter(const QString &tag);
+
 signals:
   void itemSelected(const QString &objectId);
   void itemDoubleClicked(const QString &objectId);
@@ -44,14 +59,25 @@ signals:
 protected:
   void selectionChanged(const QItemSelection &selected,
                         const QItemSelection &deselected) override;
+  void dropEvent(QDropEvent *event) override;
+  void dragEnterEvent(QDragEnterEvent *event) override;
+  void dragMoveEvent(QDragMoveEvent *event) override;
 
 private slots:
   void onItemDoubleClicked(QTreeWidgetItem *item, int column);
   void onItemChanged(QTreeWidgetItem *item, int column);
 
 private:
+  bool canDropOn(QTreeWidgetItem *dragItem, QTreeWidgetItem *dropItem) const;
+  QString getObjectId(QTreeWidgetItem *item) const;
+  bool isLayerItem(QTreeWidgetItem *item) const;
+  bool passesFilters(class NMSceneObject *obj) const;
+
   class NMSceneGraphicsScene *m_scene = nullptr;
   class NMSceneViewPanel *m_sceneViewPanel = nullptr;
+  QString m_filterText;
+  int m_typeFilter = -1; // -1 = all types
+  QString m_tagFilter;
 };
 
 /**
@@ -95,6 +121,11 @@ private slots:
   void onBringToFront();
   void onSendToBack();
 
+private slots:
+  void onFilterTextChanged(const QString &text);
+  void onTypeFilterChanged(int index);
+  void onTagFilterChanged(const QString &tag);
+
 private:
   void setupToolBar();
   void setupContent();
@@ -104,6 +135,9 @@ private:
   QWidget *m_contentWidget = nullptr;
   QToolBar *m_toolBar = nullptr;
   class NMSceneViewPanel *m_sceneViewPanel = nullptr;
+  class QLineEdit *m_searchEdit = nullptr;
+  class QComboBox *m_typeFilterCombo = nullptr;
+  class QLineEdit *m_tagFilterEdit = nullptr;
 };
 
 } // namespace NovelMind::editor::qt
