@@ -127,8 +127,7 @@ void NMDiagnosticsPanel::setupUI() {
           [this](const QString &message, const QString &source, int level) {
             Q_UNUSED(level);
             addDiagnostic("Info",
-                          source.isEmpty() ? message
-                                           : source + ": " + message);
+                          source.isEmpty() ? message : source + ": " + message);
           });
 }
 
@@ -411,9 +410,9 @@ void NMDiagnosticsPanel::applyTypeFilter() {
   }
   for (int i = 0; i < m_diagnosticsTree->topLevelItemCount(); ++i) {
     auto *item = m_diagnosticsTree->topLevelItem(i);
-    const bool visible = m_activeFilter.isEmpty() ||
-                         item->text(0).compare(m_activeFilter,
-                                               Qt::CaseInsensitive) == 0;
+    const bool visible =
+        m_activeFilter.isEmpty() ||
+        item->text(0).compare(m_activeFilter, Qt::CaseInsensitive) == 0;
     item->setHidden(!visible);
   }
 }

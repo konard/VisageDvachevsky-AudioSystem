@@ -2,7 +2,8 @@
 
 /**
  * @file nm_diagnostics_panel.hpp
- * @brief Diagnostics panel for errors, warnings, and issues with rich info support
+ * @brief Diagnostics panel for errors, warnings, and issues with rich info
+ * support
  */
 
 #include "NovelMind/editor/error_reporter.hpp"
@@ -31,7 +32,8 @@ public:
   void onUpdate(double deltaTime) override;
 
   // IDiagnosticListener interface
-  void onDiagnosticAdded(const NovelMind::editor::Diagnostic &diagnostic) override;
+  void
+  onDiagnosticAdded(const NovelMind::editor::Diagnostic &diagnostic) override;
   void onAllDiagnosticsCleared() override;
 
   // Legacy methods for backward compatibility
@@ -48,9 +50,10 @@ private:
   void setupUI();
   void applyTypeFilter();
   void addDiagnosticToTree(const NovelMind::editor::Diagnostic &diag);
-  QTreeWidgetItem *createDiagnosticItem(const NovelMind::editor::Diagnostic &diag);
+  QTreeWidgetItem *
+  createDiagnosticItem(const NovelMind::editor::Diagnostic &diag);
   void createRelatedInfoItems(QTreeWidgetItem *parent,
-                               const NovelMind::editor::Diagnostic &diag);
+                              const NovelMind::editor::Diagnostic &diag);
   void createSuggestionItems(QTreeWidgetItem *parent,
                              const NovelMind::editor::Diagnostic &diag);
   QString diagnosticTypeString(const NovelMind::editor::Diagnostic &diag) const;
