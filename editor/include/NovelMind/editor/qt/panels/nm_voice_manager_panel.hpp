@@ -13,6 +13,7 @@
  * - Async duration probing with caching
  */
 
+#include "NovelMind/audio/voice_manifest.hpp"
 #include "NovelMind/editor/qt/nm_dock_panel.hpp"
 
 #include <QHash>
@@ -21,6 +22,7 @@
 #include <QToolBar>
 #include <QWidget>
 
+#include <memory>
 #include <unordered_map>
 
 // Forward declarations for Qt Multimedia
@@ -87,9 +89,9 @@ public:
   void autoMatchVoiceFiles();
 
   /**
-   * @brief Get list of unmatched dialogue lines
+   * @brief Get list of missing voice lines for current locale
    */
-  [[nodiscard]] QList<VoiceLineEntry> getUnmatchedLines() const;
+  [[nodiscard]] std::vector<const NovelMind::audio::VoiceManifestLine *> getMissingLines() const;
 
   /**
    * @brief Export voice mapping to CSV
@@ -123,16 +125,24 @@ private slots:
   void onAutoMatchClicked();
   void onImportClicked();
   void onExportClicked();
+  void onExportTemplateClicked();
+  void onValidateManifestClicked();
   void onPlayClicked();
   void onStopClicked();
   void onLineSelected(QTreeWidgetItem *item, int column);
   void onFilterChanged(const QString &text);
   void onCharacterFilterChanged(int index);
+  void onLocaleFilterChanged(int index);
+  void onStatusFilterChanged(int index);
   void onShowOnlyUnmatched(bool checked);
   void onVolumeChanged(int value);
   void onAssignVoiceFile();
   void onClearVoiceFile();
   void onOpenVoiceFolder();
+  void onEditLineMetadata();
+  void onAddTake();
+  void onSetActiveTake();
+  void onSetLineStatus();
 
   // Qt Multimedia slots
   void onPlaybackStateChanged();
@@ -177,6 +187,8 @@ private:
   QToolBar *m_toolbar = nullptr;
   QLineEdit *m_filterEdit = nullptr;
   QComboBox *m_characterFilter = nullptr;
+  QComboBox *m_localeFilter = nullptr;
+  QComboBox *m_statusFilter = nullptr;
   QPushButton *m_showUnmatchedBtn = nullptr;
   QPushButton *m_playBtn = nullptr;
   QPushButton *m_stopBtn = nullptr;
@@ -199,10 +211,10 @@ private:
   // Duration cache: path -> {duration, mtime}
   std::unordered_map<std::string, DurationCacheEntry> m_durationCache;
 
-  // Data
-  QHash<QString, VoiceLineEntry> m_voiceLines;
+  // Data - VoiceManifest is the single source of truth
+  std::unique_ptr<NovelMind::audio::VoiceManifest> m_manifest;
+  QString m_currentLocale;
   QStringList m_voiceFiles;
-  QStringList m_characters;
   QString m_currentlyPlayingFile;
   bool m_isPlaying = false;
   qint64 m_currentDuration = 0;
