@@ -38,6 +38,7 @@ add_library(novelmind_editor STATIC
     src/editor_runtime_host_detail.cpp
     src/asset_pipeline.cpp
     src/editor_settings.cpp
+    src/settings_registry.cpp
     src/voice_manager.cpp
     src/timeline_editor.cpp
     src/scene_document.cpp
@@ -81,6 +82,7 @@ add_library(novelmind_editor STATIC
     src/qt/nm_dock_panel.cpp
     src/qt/nm_welcome_dialog.cpp
     src/qt/nm_hotkeys_dialog.cpp
+    src/qt/nm_settings_dialog.cpp
     src/qt/nm_undo_manager.cpp
     src/qt/nm_icon_manager.cpp
 
@@ -148,6 +150,7 @@ add_library(novelmind_editor STATIC
     include/NovelMind/editor/qt/nm_dock_panel.hpp
     include/NovelMind/editor/qt/nm_welcome_dialog.hpp
     include/NovelMind/editor/qt/nm_hotkeys_dialog.hpp
+    include/NovelMind/editor/qt/nm_settings_dialog.hpp
     include/NovelMind/editor/qt/nm_undo_manager.hpp
     include/NovelMind/editor/qt/nm_icon_manager.hpp
     include/NovelMind/editor/qt/nm_play_mode_controller.hpp
