@@ -166,6 +166,12 @@ void NMMainWindow::setupMenuBar() {
   m_actionToggleVoiceManager->setChecked(true);
   m_actionToggleVoiceManager->setToolTip(tr("Toggle Voice Manager panel"));
 
+  m_actionToggleAudioMixer = panelsMenu->addAction(
+      iconMgr.getIcon("panel-voice", 16), tr("&Audio Mixer"));
+  m_actionToggleAudioMixer->setCheckable(true);
+  m_actionToggleAudioMixer->setChecked(true);
+  m_actionToggleAudioMixer->setToolTip(tr("Toggle Audio Mixer panel"));
+
   m_actionToggleLocalization = panelsMenu->addAction(
       iconMgr.getIcon("panel-localization", 16), tr("&Localization"));
   m_actionToggleLocalization->setCheckable(true);

@@ -88,6 +88,8 @@ void NMMainWindow::setupConnections() {
           &QDockWidget::setVisible);
   connect(m_actionToggleVoiceManager, &QAction::toggled, m_voiceManagerPanel,
           &QDockWidget::setVisible);
+  connect(m_actionToggleAudioMixer, &QAction::toggled, m_audioMixerPanel,
+          &QDockWidget::setVisible);
   connect(m_actionToggleLocalization, &QAction::toggled, m_localizationPanel,
           &QDockWidget::setVisible);
   connect(m_actionToggleTimeline, &QAction::toggled, m_timelinePanel,
