@@ -68,6 +68,21 @@ public:
   [[nodiscard]] qreal scaleX() const { return m_scaleX; }
   [[nodiscard]] qreal scaleY() const { return m_scaleY; }
 
+  // Parent-child relationships
+  void setParentObjectId(const QString &parentId) { m_parentObjectId = parentId; }
+  [[nodiscard]] QString parentObjectId() const { return m_parentObjectId; }
+  [[nodiscard]] QStringList childObjectIds() const { return m_childObjectIds; }
+  void addChildObjectId(const QString &childId);
+  void removeChildObjectId(const QString &childId);
+  void clearChildObjectIds() { m_childObjectIds.clear(); }
+
+  // Tags for filtering
+  void addTag(const QString &tag);
+  void removeTag(const QString &tag);
+  [[nodiscard]] bool hasTag(const QString &tag) const;
+  [[nodiscard]] QStringList tags() const { return m_tags; }
+  void setTags(const QStringList &tags) { m_tags = tags; }
+
 protected:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
              QWidget *widget) override;
@@ -86,6 +101,9 @@ private:
   qreal m_scaleY = 1.0;
   bool m_selected = false;
   bool m_locked = false;
+  QString m_parentObjectId;
+  QStringList m_childObjectIds;
+  QStringList m_tags;
 };
 
 /**
@@ -164,6 +182,7 @@ public:
   bool setObjectVisible(const QString &objectId, bool visible);
   bool setObjectLocked(const QString &objectId, bool locked);
   bool setObjectZOrder(const QString &objectId, qreal zValue);
+  bool reparentObject(const QString &objectId, const QString &newParentId);
   [[nodiscard]] qreal getObjectRotation(const QString &objectId) const;
   [[nodiscard]] QPointF getObjectScale(const QString &objectId) const;
   [[nodiscard]] bool isObjectLocked(const QString &objectId) const;
@@ -346,6 +365,7 @@ public:
   bool setObjectVisible(const QString &id, bool visible);
   bool setObjectLocked(const QString &id, bool locked);
   bool setObjectZOrder(const QString &id, qreal zValue);
+  bool reparentObject(const QString &id, const QString &newParentId);
   bool applyObjectTransform(const QString &id, const QPointF &pos,
                             qreal rotation, qreal scaleX, qreal scaleY);
   bool renameObject(const QString &id, const QString &name);

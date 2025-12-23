@@ -106,6 +106,18 @@ bool NMSceneViewPanel::setObjectZOrder(const QString &id, qreal zValue) {
   return ok;
 }
 
+bool NMSceneViewPanel::reparentObject(const QString &id,
+                                      const QString &newParentId) {
+  if (!m_scene || id.isEmpty()) {
+    return false;
+  }
+  const bool ok = m_scene->reparentObject(id, newParentId);
+  if (ok) {
+    emit sceneObjectsChanged();
+  }
+  return ok;
+}
+
 bool NMSceneViewPanel::applyObjectTransform(const QString &id,
                                             const QPointF &pos,
                                             qreal rotation, qreal scaleX,

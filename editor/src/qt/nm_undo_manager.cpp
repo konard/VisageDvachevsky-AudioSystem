@@ -380,6 +380,49 @@ void ToggleObjectLockedCommand::redo() {
 }
 
 // =============================================================================
+// ReparentObjectCommand Implementation
+// =============================================================================
+
+ReparentObjectCommand::ReparentObjectCommand(NMSceneViewPanel *panel,
+                                             const QString &objectId,
+                                             const QString &oldParentId,
+                                             const QString &newParentId,
+                                             QUndoCommand *parent)
+    : QUndoCommand(parent), m_panel(panel), m_objectId(objectId),
+      m_oldParentId(oldParentId), m_newParentId(newParentId) {
+  setText(QString("Reparent: %1").arg(objectId));
+}
+
+void ReparentObjectCommand::undo() {
+  if (!m_panel) {
+    return;
+  }
+  m_panel->reparentObject(m_objectId, m_oldParentId);
+}
+
+void ReparentObjectCommand::redo() {
+  if (!m_panel) {
+    return;
+  }
+  m_panel->reparentObject(m_objectId, m_newParentId);
+}
+
+bool ReparentObjectCommand::mergeWith(const QUndoCommand *other) {
+  if (other->id() != id()) {
+    return false;
+  }
+
+  const auto *otherReparent = static_cast<const ReparentObjectCommand *>(other);
+  if (otherReparent->m_objectId != m_objectId) {
+    return false;
+  }
+
+  // Merge consecutive reparenting of the same object
+  m_newParentId = otherReparent->m_newParentId;
+  return true;
+}
+
+// =============================================================================
 // CreateGraphNodeCommand Implementation
 // =============================================================================
 

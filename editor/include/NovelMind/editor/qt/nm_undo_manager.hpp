@@ -331,6 +331,27 @@ private:
 };
 
 /**
+ * @brief Command for reparenting an object
+ */
+class ReparentObjectCommand : public QUndoCommand {
+public:
+  ReparentObjectCommand(NMSceneViewPanel *panel, const QString &objectId,
+                        const QString &oldParentId, const QString &newParentId,
+                        QUndoCommand *parent = nullptr);
+
+  void undo() override;
+  void redo() override;
+  bool mergeWith(const QUndoCommand *other) override;
+  int id() const override { return 5; } // Unique ID for command merging
+
+private:
+  QPointer<NMSceneViewPanel> m_panel;
+  QString m_objectId;
+  QString m_oldParentId;
+  QString m_newParentId;
+};
+
+/**
  * @brief Command for creating a graph node
  */
 class CreateGraphNodeCommand : public QUndoCommand {

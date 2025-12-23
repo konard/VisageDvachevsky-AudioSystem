@@ -288,6 +288,63 @@ void NMInspectorPanel::inspectSceneObject(NMSceneObject *object,
   connect(renderGroup, &NMPropertyGroup::propertyValueChanged, this,
           &NMInspectorPanel::onGroupPropertyChanged);
 
+  // Tags group for tag editing
+  auto *tagsGroup = addGroup(tr("Tags"));
+  if (m_editMode) {
+    // Create a widget for tag editing with add/remove functionality
+    auto *tagsWidget = new QWidget(m_scrollContent);
+    auto *tagsLayout = new QVBoxLayout(tagsWidget);
+    tagsLayout->setContentsMargins(0, 0, 0, 0);
+
+    // Display current tags
+    const QStringList tags = object->tags();
+    auto *tagsListLabel = new QLabel(tags.isEmpty() ? tr("(no tags)") : tags.join(", "), tagsWidget);
+    tagsListLabel->setWordWrap(true);
+    tagsLayout->addWidget(tagsListLabel);
+
+    // Add tag input
+    auto *addTagLayout = new QHBoxLayout();
+    auto *tagInput = new QLineEdit(tagsWidget);
+    tagInput->setPlaceholderText(tr("Add tag..."));
+    auto *addButton = new QPushButton(tr("Add"), tagsWidget);
+    addTagLayout->addWidget(tagInput);
+    addTagLayout->addWidget(addButton);
+    tagsLayout->addLayout(addTagLayout);
+
+    // Connect add button
+    connect(addButton, &QPushButton::clicked, [this, tagInput, object]() {
+      const QString tag = tagInput->text().trimmed();
+      if (!tag.isEmpty() && !object->hasTag(tag)) {
+        object->addTag(tag);
+        tagInput->clear();
+        // Refresh inspector to show updated tags
+        inspectSceneObject(object, m_editMode);
+      }
+    });
+
+    // Remove tag buttons for each existing tag
+    for (const QString &tag : tags) {
+      auto *tagLayout = new QHBoxLayout();
+      auto *tagLabel = new QLabel(tag, tagsWidget);
+      auto *removeButton = new QPushButton(tr("Remove"), tagsWidget);
+      removeButton->setMaximumWidth(80);
+      tagLayout->addWidget(tagLabel);
+      tagLayout->addWidget(removeButton);
+      tagsLayout->addLayout(tagLayout);
+
+      connect(removeButton, &QPushButton::clicked, [this, tag, object]() {
+        object->removeTag(tag);
+        // Refresh inspector to show updated tags
+        inspectSceneObject(object, m_editMode);
+      });
+    }
+
+    tagsGroup->addProperty(tr("Tag Editor"), tagsWidget);
+  } else {
+    const QStringList tags = object->tags();
+    tagsGroup->addProperty(tr("Tags"), tags.isEmpty() ? tr("(no tags)") : tags.join(", "));
+  }
+
   m_mainLayout->addStretch();
 }
 

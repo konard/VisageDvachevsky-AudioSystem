@@ -201,6 +201,58 @@ bool NMSceneGraphicsScene::setObjectZOrder(const QString &objectId,
   return false;
 }
 
+bool NMSceneGraphicsScene::reparentObject(const QString &objectId,
+                                          const QString &newParentId) {
+  auto *obj = findSceneObject(objectId);
+  if (!obj) {
+    return false;
+  }
+
+  // Get old parent
+  const QString oldParentId = obj->parentObjectId();
+
+  // Check for cycle: prevent setting parent to self or any descendant
+  if (!newParentId.isEmpty()) {
+    if (newParentId == objectId) {
+      // Cannot parent to self
+      return false;
+    }
+
+    // Check if newParent is a descendant of obj
+    QString checkId = newParentId;
+    while (!checkId.isEmpty()) {
+      if (checkId == objectId) {
+        // Would create a cycle
+        return false;
+      }
+      auto *checkObj = findSceneObject(checkId);
+      if (!checkObj) {
+        break;
+      }
+      checkId = checkObj->parentObjectId();
+    }
+  }
+
+  // Remove from old parent's child list
+  if (!oldParentId.isEmpty()) {
+    if (auto *oldParent = findSceneObject(oldParentId)) {
+      oldParent->removeChildObjectId(objectId);
+    }
+  }
+
+  // Set new parent
+  obj->setParentObjectId(newParentId);
+
+  // Add to new parent's child list
+  if (!newParentId.isEmpty()) {
+    if (auto *newParent = findSceneObject(newParentId)) {
+      newParent->addChildObjectId(objectId);
+    }
+  }
+
+  return true;
+}
+
 QPointF NMSceneGraphicsScene::getObjectScale(
     const QString &objectId) const {
   if (auto *obj = findSceneObject(objectId)) {

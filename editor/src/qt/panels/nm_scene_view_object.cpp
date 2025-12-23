@@ -211,5 +211,28 @@ void NMSceneObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   QGraphicsPixmapItem::mouseReleaseEvent(event);
 }
 
+void NMSceneObject::addChildObjectId(const QString &childId) {
+  if (!childId.isEmpty() && !m_childObjectIds.contains(childId)) {
+    m_childObjectIds.append(childId);
+  }
+}
+
+void NMSceneObject::removeChildObjectId(const QString &childId) {
+  m_childObjectIds.removeAll(childId);
+}
+
+void NMSceneObject::addTag(const QString &tag) {
+  if (!tag.isEmpty() && !m_tags.contains(tag)) {
+    m_tags.append(tag);
+  }
+}
+
+void NMSceneObject::removeTag(const QString &tag) {
+  m_tags.removeAll(tag);
+}
+
+bool NMSceneObject::hasTag(const QString &tag) const {
+  return m_tags.contains(tag);
+}
 
 } // namespace NovelMind::editor::qt

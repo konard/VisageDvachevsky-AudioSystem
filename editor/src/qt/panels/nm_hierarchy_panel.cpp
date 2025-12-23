@@ -4,7 +4,10 @@
 #include "NovelMind/editor/qt/nm_undo_manager.hpp"
 
 #include <QAction>
+#include <QComboBox>
 #include <QHeaderView>
+#include <QLabel>
+#include <QLineEdit>
 #include <QSignalBlocker>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -21,9 +24,10 @@ NMHierarchyTree::NMHierarchyTree(QWidget *parent) : QTreeWidget(parent) {
   setHeaderLabels({tr("Name"), tr("V"), tr("L")});
   setHeaderHidden(false);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
-  setDragEnabled(false); // Phase 2: Enable for drag-drop
-  setAcceptDrops(false);
+  setDragEnabled(true); // Enable drag-drop for reparenting
+  setAcceptDrops(true);
   setDropIndicatorShown(true);
+  setDragDropMode(QAbstractItemView::InternalMove);
   setAnimated(true);
   setIndentation(16);
 
@@ -78,6 +82,11 @@ void NMHierarchyTree::refresh() {
 
   for (NMSceneObject *object : sorted) {
     if (!object) {
+      continue;
+    }
+
+    // Apply filters
+    if (!passesFilters(object)) {
       continue;
     }
 
@@ -148,6 +157,51 @@ void NMHierarchyTree::refresh() {
       ++it;
     }
   }
+}
+
+void NMHierarchyTree::setFilterText(const QString &text) {
+  m_filterText = text;
+  refresh();
+}
+
+void NMHierarchyTree::setTypeFilter(int typeIndex) {
+  m_typeFilter = typeIndex;
+  refresh();
+}
+
+void NMHierarchyTree::setTagFilter(const QString &tag) {
+  m_tagFilter = tag;
+  refresh();
+}
+
+bool NMHierarchyTree::passesFilters(NMSceneObject *obj) const {
+  if (!obj) {
+    return false;
+  }
+
+  // Name/ID filter
+  if (!m_filterText.isEmpty()) {
+    const QString name = obj->name().isEmpty() ? obj->id() : obj->name();
+    if (!name.contains(m_filterText, Qt::CaseInsensitive)) {
+      return false;
+    }
+  }
+
+  // Type filter
+  if (m_typeFilter >= 0) {
+    if (static_cast<int>(obj->objectType()) != m_typeFilter) {
+      return false;
+    }
+  }
+
+  // Tag filter
+  if (!m_tagFilter.isEmpty()) {
+    if (!obj->hasTag(m_tagFilter)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 void NMHierarchyTree::selectionChanged(const QItemSelection &selected,
@@ -234,6 +288,116 @@ void NMHierarchyTree::onItemChanged(QTreeWidgetItem *item, int column) {
   }
 }
 
+void NMHierarchyTree::dragEnterEvent(QDragEnterEvent *event) {
+  QTreeWidget::dragEnterEvent(event);
+}
+
+void NMHierarchyTree::dragMoveEvent(QDragMoveEvent *event) {
+  QTreeWidgetItem *dropItem = itemAt(event->pos());
+  QTreeWidgetItem *dragItem = currentItem();
+
+  if (!dragItem || !dropItem || !canDropOn(dragItem, dropItem)) {
+    event->ignore();
+    return;
+  }
+
+  QTreeWidget::dragMoveEvent(event);
+}
+
+void NMHierarchyTree::dropEvent(QDropEvent *event) {
+  QTreeWidgetItem *dragItem = currentItem();
+  QTreeWidgetItem *dropItem = itemAt(event->pos());
+
+  if (!dragItem || !dropItem || !m_scene || !m_sceneViewPanel) {
+    event->ignore();
+    return;
+  }
+
+  const QString dragObjectId = getObjectId(dragItem);
+  const QString dropObjectId = getObjectId(dropItem);
+
+  if (dragObjectId.isEmpty() || !canDropOn(dragItem, dropItem)) {
+    event->ignore();
+    return;
+  }
+
+  // Get old parent before reparenting
+  auto *dragObj = m_scene->findSceneObject(dragObjectId);
+  const QString oldParentId = dragObj ? dragObj->parentObjectId() : QString();
+
+  // Determine new parent: if dropping on a layer, new parent is empty
+  const QString newParentId = isLayerItem(dropItem) ? QString() : dropObjectId;
+
+  // Create undo command for reparenting
+  auto *cmd =
+      new ReparentObjectCommand(m_sceneViewPanel, dragObjectId, oldParentId, newParentId);
+  NMUndoManager::instance().pushCommand(cmd);
+
+  // Prevent default drop behavior since we handle it via undo command
+  event->setDropAction(Qt::IgnoreAction);
+  event->accept();
+
+  // Refresh the tree
+  refresh();
+}
+
+QString NMHierarchyTree::getObjectId(QTreeWidgetItem *item) const {
+  if (!item) {
+    return QString();
+  }
+  return item->data(0, Qt::UserRole).toString();
+}
+
+bool NMHierarchyTree::isLayerItem(QTreeWidgetItem *item) const {
+  if (!item) {
+    return false;
+  }
+  const QString text = item->text(0);
+  return text == "Scene Objects" || text == "Backgrounds" ||
+         text == "Characters" || text == "UI" || text == "Effects";
+}
+
+bool NMHierarchyTree::canDropOn(QTreeWidgetItem *dragItem,
+                                QTreeWidgetItem *dropItem) const {
+  if (!dragItem || !dropItem || !m_scene) {
+    return false;
+  }
+
+  const QString dragId = getObjectId(dragItem);
+  const QString dropId = getObjectId(dropItem);
+
+  if (dragId.isEmpty()) {
+    return false;
+  }
+
+  // Can drop on layer items
+  if (isLayerItem(dropItem)) {
+    return true;
+  }
+
+  // Cannot drop on self
+  if (dragId == dropId) {
+    return false;
+  }
+
+  // Check for cycle: cannot drop on own descendant
+  if (!dropId.isEmpty()) {
+    QString checkId = dropId;
+    while (!checkId.isEmpty()) {
+      if (checkId == dragId) {
+        return false; // Would create a cycle
+      }
+      auto *checkObj = m_scene->findSceneObject(checkId);
+      if (!checkObj) {
+        break;
+      }
+      checkId = checkObj->parentObjectId();
+    }
+  }
+
+  return true;
+}
+
 // ============================================================================
 // NMHierarchyPanel
 // ============================================================================
@@ -306,6 +470,43 @@ void NMHierarchyPanel::setupToolBar() {
   m_toolBar = new QToolBar(this);
   m_toolBar->setObjectName("HierarchyToolBar");
   m_toolBar->setIconSize(QSize(16, 16));
+
+  // Search filter
+  m_toolBar->addWidget(new QLabel(tr("Search:"), m_toolBar));
+  m_searchEdit = new QLineEdit(m_toolBar);
+  m_searchEdit->setPlaceholderText(tr("Filter by name..."));
+  m_searchEdit->setMaximumWidth(150);
+  m_toolBar->addWidget(m_searchEdit);
+  connect(m_searchEdit, &QLineEdit::textChanged, this,
+          &NMHierarchyPanel::onFilterTextChanged);
+
+  m_toolBar->addSeparator();
+
+  // Type filter
+  m_toolBar->addWidget(new QLabel(tr("Type:"), m_toolBar));
+  m_typeFilterCombo = new QComboBox(m_toolBar);
+  m_typeFilterCombo->addItem(tr("All"));
+  m_typeFilterCombo->addItem(tr("Background"));
+  m_typeFilterCombo->addItem(tr("Character"));
+  m_typeFilterCombo->addItem(tr("UI"));
+  m_typeFilterCombo->addItem(tr("Effect"));
+  m_typeFilterCombo->setMaximumWidth(120);
+  m_toolBar->addWidget(m_typeFilterCombo);
+  connect(m_typeFilterCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+          &NMHierarchyPanel::onTypeFilterChanged);
+
+  m_toolBar->addSeparator();
+
+  // Tag filter
+  m_toolBar->addWidget(new QLabel(tr("Tag:"), m_toolBar));
+  m_tagFilterEdit = new QLineEdit(m_toolBar);
+  m_tagFilterEdit->setPlaceholderText(tr("Filter by tag..."));
+  m_tagFilterEdit->setMaximumWidth(120);
+  m_toolBar->addWidget(m_tagFilterEdit);
+  connect(m_tagFilterEdit, &QLineEdit::textChanged, this,
+          &NMHierarchyPanel::onTagFilterChanged);
+
+  m_toolBar->addSeparator();
 
   QAction *actionRefresh = m_toolBar->addAction(tr("Refresh"));
   actionRefresh->setToolTip(tr("Refresh Hierarchy"));
@@ -454,6 +655,25 @@ void NMHierarchyPanel::adjustSelectedZ(int mode) {
     scene->setObjectZOrder(objectId, newZ);
   }
   refresh();
+}
+
+void NMHierarchyPanel::onFilterTextChanged(const QString &text) {
+  if (m_tree) {
+    m_tree->setFilterText(text);
+  }
+}
+
+void NMHierarchyPanel::onTypeFilterChanged(int index) {
+  if (m_tree) {
+    // Index 0 = "All" (-1), other indices map to NMSceneObjectType enum
+    m_tree->setTypeFilter(index - 1);
+  }
+}
+
+void NMHierarchyPanel::onTagFilterChanged(const QString &tag) {
+  if (m_tree) {
+    m_tree->setTagFilter(tag);
+  }
 }
 
 } // namespace NovelMind::editor::qt
