@@ -488,8 +488,54 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // D1: Project Gate - Ensure a project is always loaded before showing editor
+  auto &projectManager = NovelMind::editor::ProjectManager::instance();
+  if (!projectManager.hasOpenProject()) {
+    // No project is open - we must have a project to continue
+    core::Logger::instance().warning(
+        "No project loaded - returning to project selection");
+
+    // Show project picker in a loop until user opens/creates a project or quits
+    while (!projectManager.hasOpenProject()) {
+      NMWelcomeDialog projectPicker;
+      if (projectPicker.exec() == QDialog::Accepted) {
+        if (projectPicker.shouldCreateNewProject()) {
+          if (runNewProjectDialog(projectPicker.selectedTemplate())) {
+            break; // Project created successfully
+          }
+        } else if (!projectPicker.selectedProjectPath().isEmpty()) {
+          auto result = projectManager.openProject(
+              projectPicker.selectedProjectPath().toStdString());
+          if (!result.isError()) {
+            applyProjectAndRemember();
+            break; // Project opened successfully
+          }
+          NMMessageDialog::showError(
+              &mainWindow, QObject::tr("Open Project Failed"),
+              QString::fromStdString(result.error()));
+        }
+      } else {
+        // User closed project picker - exit application (cannot use editor without project)
+        core::Logger::instance().info(
+            "User declined to select a project - exiting application");
+        return 0;
+      }
+    }
+  }
+
+  // Run auto-validation on the now-loaded project
+  runAutoValidation();
+
+  // Apply default workspace preset on first project load
+  QSettings settings("NovelMind", "Editor");
+  if (!settings.value("workspace/presetApplied", false).toBool()) {
+    mainWindow.resetToDefaultLayout();
+    settings.setValue("workspace/presetApplied", true);
+  }
+
   // Show the main window
-  core::Logger::instance().info("Showing main window");
+  core::Logger::instance().info("Showing main window with project: " +
+                                projectManager.getProjectName());
   mainWindow.show();
 
   core::Logger::instance().info("Editor initialized successfully");

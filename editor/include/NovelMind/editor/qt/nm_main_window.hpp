@@ -232,14 +232,61 @@ protected:
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watched, QEvent *event) override;
 
-private:
+public:
+  /**
+   * @brief D2: Layout presets for different workflows
+   *
+   * These presets are designed for common use cases in visual novel development:
+   * - Default: Balanced layout for general editing
+   * - StoryScript: Story graph and script editing focused
+   * - SceneAnimation: Scene view with timeline/curve editors
+   * - AudioVoice: Voice studio with audio mixing
+   * - Diagnostics: Development and debugging focused
+   */
   enum class LayoutPreset {
-    Story,
-    Scene,
-    Script,
-    Developer,
-    Compact
+    Default,        // D2: Default balanced workspace
+    StoryScript,    // D2: Story/Script focused
+    SceneAnimation, // D2: Scene/Animation focused
+    AudioVoice,     // D2: Audio/Voice focused (D6)
+    Story,          // Legacy: Story graph focused
+    Scene,          // Legacy: Scene editing focused
+    Script,         // Legacy: Script editing focused
+    Developer,      // Legacy: Development tools visible
+    Compact         // Legacy: Minimal UI
   };
+
+  /**
+   * @brief Apply a workspace preset
+   * @param preset The preset to apply
+   */
+  void applyWorkspacePreset(LayoutPreset preset);
+
+  /**
+   * @brief Get the current workspace preset name
+   * @return The name of the current preset
+   */
+  QString currentWorkspacePresetName() const;
+
+  /**
+   * @brief Save the current layout as a named preset
+   * @param name The name for the preset
+   */
+  void saveWorkspacePreset(const QString &name);
+
+  /**
+   * @brief Load a named workspace preset
+   * @param name The name of the preset to load
+   * @return true if loaded successfully
+   */
+  bool loadWorkspacePreset(const QString &name);
+
+  /**
+   * @brief Get list of available workspace presets
+   * @return List of preset names (including built-in and custom)
+   */
+  QStringList availableWorkspacePresets() const;
+
+private:
 
   void setupMenuBar();
   void setupToolBar();
@@ -313,6 +360,12 @@ private:
   QAction *m_actionLayoutScript = nullptr;
   QAction *m_actionLayoutDeveloper = nullptr;
   QAction *m_actionLayoutCompact = nullptr;
+
+  // D2: New workspace presets
+  QAction *m_actionLayoutDefault = nullptr;
+  QAction *m_actionLayoutStoryScript = nullptr;
+  QAction *m_actionLayoutSceneAnimation = nullptr;
+  QAction *m_actionLayoutAudioVoice = nullptr;
   QAction *m_actionResetLayout = nullptr;
   QAction *m_actionSaveLayout = nullptr;
   QAction *m_actionLoadLayout = nullptr;
@@ -366,6 +419,9 @@ private:
   bool m_layoutLocked = false;
   bool m_tabbedDockOnly = false;
   bool m_floatAllowed = true;
+
+  // D2: Current workspace preset tracking
+  LayoutPreset m_currentPreset = LayoutPreset::Default;
 
   QString m_activeProjectName;
   QString m_activeGraphLabel = "StoryGraph";

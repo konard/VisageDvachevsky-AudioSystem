@@ -176,6 +176,9 @@ void NMMainWindow::setupConnections() {
           &QDockWidget::setVisible);
   connect(m_actionToggleDiagnostics, &QAction::toggled, m_diagnosticsPanel,
           &QDockWidget::setVisible);
+  // D6: Audio/Voice panel connections
+  connect(m_actionToggleVoiceStudio, &QAction::toggled, m_voiceStudioPanel,
+          &QDockWidget::setVisible);
   connect(m_actionToggleVoiceManager, &QAction::toggled, m_voiceManagerPanel,
           &QDockWidget::setVisible);
   connect(m_actionToggleAudioMixer, &QAction::toggled, m_audioMixerPanel,
@@ -218,8 +221,13 @@ void NMMainWindow::setupConnections() {
           m_actionToggleIssues, &QAction::setChecked);
   connect(m_diagnosticsPanel, &QDockWidget::visibilityChanged,
           m_actionToggleDiagnostics, &QAction::setChecked);
+  // D6: Audio/Voice visibility sync
+  connect(m_voiceStudioPanel, &QDockWidget::visibilityChanged,
+          m_actionToggleVoiceStudio, &QAction::setChecked);
   connect(m_voiceManagerPanel, &QDockWidget::visibilityChanged,
           m_actionToggleVoiceManager, &QAction::setChecked);
+  connect(m_audioMixerPanel, &QDockWidget::visibilityChanged,
+          m_actionToggleAudioMixer, &QAction::setChecked);
   connect(m_localizationPanel, &QDockWidget::visibilityChanged,
           m_actionToggleLocalization, &QAction::setChecked);
   connect(m_timelinePanel, &QDockWidget::visibilityChanged,
@@ -243,6 +251,18 @@ void NMMainWindow::setupConnections() {
 
   connect(m_actionResetLayout, &QAction::triggered, this,
           &NMMainWindow::resetToDefaultLayout);
+
+  // D2: New workspace preset connections
+  connect(m_actionLayoutDefault, &QAction::triggered, this,
+          [this]() { applyWorkspacePreset(LayoutPreset::Default); });
+  connect(m_actionLayoutStoryScript, &QAction::triggered, this,
+          [this]() { applyWorkspacePreset(LayoutPreset::StoryScript); });
+  connect(m_actionLayoutSceneAnimation, &QAction::triggered, this,
+          [this]() { applyWorkspacePreset(LayoutPreset::SceneAnimation); });
+  connect(m_actionLayoutAudioVoice, &QAction::triggered, this,
+          [this]() { applyWorkspacePreset(LayoutPreset::AudioVoice); });
+
+  // Legacy workspace presets
   connect(m_actionLayoutStory, &QAction::triggered, this,
           [this]() { applyLayoutPreset(LayoutPreset::Story); });
   connect(m_actionLayoutScene, &QAction::triggered, this,
@@ -443,12 +463,23 @@ void NMMainWindow::setupConnections() {
     addActionEntry(tr("Play"), tr("Auto Save"), m_actionAutoSaveState);
     addActionEntry(tr("Play"), tr("Auto Load"), m_actionAutoLoadState);
 
-    addActionEntry(tr("Workspaces"), tr("Story Workspace"), m_actionLayoutStory);
-    addActionEntry(tr("Workspaces"), tr("Scene Workspace"), m_actionLayoutScene);
-    addActionEntry(tr("Workspaces"), tr("Script Workspace"), m_actionLayoutScript);
-    addActionEntry(tr("Workspaces"), tr("Developer Workspace"),
+    // D6: Audio/Voice actions
+    addActionEntry(tr("Audio / Voice"), tr("Voice Studio"), m_actionToggleVoiceStudio,
+                   tr("Record and edit voice lines with waveform visualization"));
+
+    // D2: New workspace presets
+    addActionEntry(tr("Workspaces"), tr("Default"), m_actionLayoutDefault);
+    addActionEntry(tr("Workspaces"), tr("Story / Script"), m_actionLayoutStoryScript);
+    addActionEntry(tr("Workspaces"), tr("Scene / Animation"), m_actionLayoutSceneAnimation);
+    addActionEntry(tr("Workspaces"), tr("Audio / Voice"), m_actionLayoutAudioVoice);
+
+    // Legacy workspaces
+    addActionEntry(tr("Workspaces"), tr("Story (Legacy)"), m_actionLayoutStory);
+    addActionEntry(tr("Workspaces"), tr("Scene (Legacy)"), m_actionLayoutScene);
+    addActionEntry(tr("Workspaces"), tr("Script (Legacy)"), m_actionLayoutScript);
+    addActionEntry(tr("Workspaces"), tr("Developer (Legacy)"),
                    m_actionLayoutDeveloper);
-    addActionEntry(tr("Workspaces"), tr("Compact Workspace"),
+    addActionEntry(tr("Workspaces"), tr("Compact (Legacy)"),
                    m_actionLayoutCompact);
     addActionEntry(tr("Layout"), tr("Focus Mode"), m_actionFocusMode);
     addActionEntry(tr("Layout"), tr("Lock Layout"), m_actionLockLayout);
