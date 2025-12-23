@@ -1,0 +1,245 @@
+{
+  "sceneId": "ending",
+  "version": "1.0",
+  "timeline": {
+    "duration": 20.0,
+    "frameRate": 30.0,
+    "tracks": [
+      {
+        "id": "track_bg_deck",
+        "name": "Background - Observation Deck",
+        "type": "Background",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_bg_deck",
+            "name": "Observation Deck",
+            "startTime": 0.0,
+            "duration": 15.0,
+            "assetPath": "assets/images/bg_deck.png",
+            "propertyTracks": [
+              {
+                "propertyName": "opacity",
+                "displayName": "Opacity",
+                "keyframes": [
+                  {
+                    "time": 0.0,
+                    "value": 0.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 1.0,
+                    "value": 1.0,
+                    "interpolation": "EaseIn"
+                  },
+                  {
+                    "time": 12.0,
+                    "value": 1.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 15.0,
+                    "value": 0.0,
+                    "interpolation": "EaseOut"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_alice_ending",
+        "name": "Character - Alice",
+        "type": "Character",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_alice_ending",
+            "name": "Alice Farewell",
+            "startTime": 1.0,
+            "duration": 8.0,
+            "assetPath": "assets/images/char_alice.png",
+            "propertyTracks": [
+              {
+                "propertyName": "position.x",
+                "displayName": "Position X",
+                "keyframes": [
+                  {
+                    "time": 1.0,
+                    "value": 480.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              },
+              {
+                "propertyName": "position.y",
+                "displayName": "Position Y",
+                "keyframes": [
+                  {
+                    "time": 1.0,
+                    "value": 540.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              },
+              {
+                "propertyName": "opacity",
+                "displayName": "Opacity",
+                "keyframes": [
+                  {
+                    "time": 1.0,
+                    "value": 1.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 8.0,
+                    "value": 1.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 9.0,
+                    "value": 0.0,
+                    "interpolation": "EaseOut"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_ai_ending",
+        "name": "Character - AI",
+        "type": "Character",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_ai_ending",
+            "name": "AI Farewell",
+            "startTime": 1.0,
+            "duration": 8.0,
+            "assetPath": "assets/images/char_ai.png",
+            "propertyTracks": [
+              {
+                "propertyName": "position.x",
+                "displayName": "Position X",
+                "keyframes": [
+                  {
+                    "time": 1.0,
+                    "value": 1440.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              },
+              {
+                "propertyName": "position.y",
+                "displayName": "Position Y",
+                "keyframes": [
+                  {
+                    "time": 1.0,
+                    "value": 540.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              },
+              {
+                "propertyName": "opacity",
+                "displayName": "Opacity",
+                "keyframes": [
+                  {
+                    "time": 1.0,
+                    "value": 1.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 8.0,
+                    "value": 1.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 9.0,
+                    "value": 0.0,
+                    "interpolation": "EaseOut"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_music_ending",
+        "name": "Background Music",
+        "type": "BGM",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_music_ending",
+            "name": "Ending Theme",
+            "startTime": 0.5,
+            "duration": 19.5,
+            "assetPath": "assets/audio/music/music_theme.wav",
+            "loop": false,
+            "propertyTracks": [
+              {
+                "propertyName": "volume",
+                "displayName": "Volume",
+                "keyframes": [
+                  {
+                    "time": 0.5,
+                    "value": 0.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 2.0,
+                    "value": 0.6,
+                    "interpolation": "EaseIn"
+                  },
+                  {
+                    "time": 15.0,
+                    "value": 0.6,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 20.0,
+                    "value": 0.0,
+                    "interpolation": "EaseOut"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "markers": [
+      {
+        "time": 0.0,
+        "label": "Ending Start"
+      },
+      {
+        "time": 9.0,
+        "label": "Characters Exit"
+      },
+      {
+        "time": 15.0,
+        "label": "Fade to Black"
+      },
+      {
+        "time": 20.0,
+        "label": "End Credits"
+      }
+    ]
+  },
+  "objects": [],
+  "metadata": {
+    "description": "Ending scene with character exits and fade-out",
+    "lastModified": "2024-01-15T10:40:00Z",
+    "author": "NovelMind Engine"
+  }
+}

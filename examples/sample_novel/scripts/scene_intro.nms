@@ -1,0 +1,43 @@
+// Scene: Introduction
+// Standalone scene file demonstrating modular script organization
+
+scene intro {
+    // Fade in from black
+    transition fade 1.5
+
+    // Set the scene
+    show background "assets/images/bg_room.png"
+
+    // Ambient background music
+    play music "assets/audio/music/music_theme.wav" loop=true fade_in=2.0
+
+    wait 0.5
+
+    // Opening narration
+    say Narrator loc("dialog.intro.narration_1")
+    wait 1.0
+    say Narrator loc("dialog.intro.narration_2")
+
+    wait 0.5
+
+    // Introduce protagonist
+    show Alice at center with fade
+
+    say Alice loc("dialog.intro.alice_1") voice "assets/audio/voice/alice_001.wav"
+    say Alice loc("dialog.intro.alice_2") voice "assets/audio/voice/alice_002.wav"
+
+    // Interaction sound
+    play sound "assets/audio/sfx/sfx_door.wav"
+
+    // Second character enters
+    show Bob at right with slide_left
+
+    say Bob loc("dialog.intro.bob_1") voice "assets/audio/voice/bob_001.wav"
+    say Bob loc("dialog.intro.bob_2") voice "assets/audio/voice/bob_002.wav"
+
+    // Character repositioning
+    move Alice to left duration=0.5
+
+    // Transition to next scene
+    goto scene_choice
+}

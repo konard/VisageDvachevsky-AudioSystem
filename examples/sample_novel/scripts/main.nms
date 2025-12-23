@@ -1,0 +1,34 @@
+// Sample Novel - Main Script Entry Point
+// Demonstrates comprehensive NMScript feature coverage
+// Version: 1.0
+// Note: Scenes are defined in separate files (scene_intro.nms, scene_choice.nms, scene_end.nms)
+
+// ============================================================================
+// CHARACTER DEFINITIONS
+// Demonstrates: character declaration with display names and colors
+// ============================================================================
+
+character Alice(name=loc("characters.alice"), color="#4A9FD9")
+character Bob(name=loc("characters.bob"), color="#F39C12")
+character AI(name=loc("characters.ai"), color="#9B59B6")
+character Narrator(name="", color="#95A5A6")
+
+// ============================================================================
+// GLOBAL VARIABLES
+// Demonstrates: variable declaration and scope
+// ============================================================================
+
+var player_trust = 0
+var investigation_depth = 0
+var ai_awakening_level = 0
+
+// ============================================================================
+// NOTES:
+// ============================================================================
+// Scenes are defined in separate modular files for better organization:
+// - scene_intro.nms: Introduction scene
+// - scene_choice.nms: Main choice and branching logic
+// - scene_end.nms: Multiple endings based on player choices
+//
+// The runtime will load all .nms files and combine them automatically.
+// ============================================================================

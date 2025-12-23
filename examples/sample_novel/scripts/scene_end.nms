@@ -1,0 +1,75 @@
+// Scene: Endings
+// Demonstrates multiple ending paths based on player choices
+
+scene scene_ending_trust {
+    // Trust/Cooperation Ending
+
+    transition fade 1.0
+    show background "assets/images/bg_deck.png"
+
+    // Music transition
+    stop music fade=1.5
+    wait 0.5
+    play music "assets/audio/music/music_theme.wav" loop=false
+
+    // Final dialogue
+    say Alice loc("dialog.ending_trust.alice_trust")
+    say AI loc("dialog.ending_trust.ai_trust")
+
+    wait 1.0
+
+    // Characters exit
+    hide Alice with fade
+    hide AI with fade
+
+    wait 0.5
+
+    // Ending narration
+    say Narrator loc("dialog.ending_trust.narration_trust")
+
+    wait 2.0
+
+    say Narrator loc("dialog.ending_trust.end_trust")
+
+    // Fade out
+    stop music fade=3.0
+    wait 3.0
+
+    transition fade 2.0
+    show background "black"
+
+    return
+}
+
+scene scene_ending_shutdown {
+    // Shutdown/Conflict Ending
+
+    show background "assets/images/bg_room.png" with fade
+
+    stop music fade=0.5
+
+    say Alice loc("dialog.ending_shutdown.alice_shutdown")
+
+    play sound "assets/audio/sfx/sfx_click.wav"
+
+    say AI loc("dialog.ending_shutdown.ai_shutdown")
+
+    wait 1.0
+
+    hide AI with fade
+
+    wait 1.0
+
+    say Narrator loc("dialog.ending_shutdown.narration_shutdown")
+
+    wait 2.0
+
+    say Narrator loc("dialog.ending_shutdown.end_shutdown")
+
+    wait 3.0
+
+    transition fade 2.0
+    show background "black"
+
+    return
+}

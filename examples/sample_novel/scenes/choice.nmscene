@@ -1,0 +1,241 @@
+{
+  "sceneId": "choice",
+  "version": "1.0",
+  "timeline": {
+    "duration": 45.0,
+    "frameRate": 30.0,
+    "tracks": [
+      {
+        "id": "track_bg_corridor",
+        "name": "Background - Corridor",
+        "type": "Background",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_bg_corridor",
+            "name": "Corridor",
+            "startTime": 0.0,
+            "duration": 45.0,
+            "assetPath": "assets/images/bg_corridor.png",
+            "propertyTracks": [
+              {
+                "propertyName": "opacity",
+                "displayName": "Opacity",
+                "keyframes": [
+                  {
+                    "time": 0.0,
+                    "value": 0.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 0.8,
+                    "value": 1.0,
+                    "interpolation": "EaseInOut"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_alice_choice",
+        "name": "Character - Alice",
+        "type": "Character",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_alice_choice",
+            "name": "Alice in Corridor",
+            "startTime": 0.0,
+            "duration": 45.0,
+            "assetPath": "assets/images/char_alice.png",
+            "propertyTracks": [
+              {
+                "propertyName": "position.x",
+                "displayName": "Position X",
+                "keyframes": [
+                  {
+                    "time": 0.0,
+                    "value": 480.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              },
+              {
+                "propertyName": "position.y",
+                "displayName": "Position Y",
+                "keyframes": [
+                  {
+                    "time": 0.0,
+                    "value": 540.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              },
+              {
+                "propertyName": "opacity",
+                "displayName": "Opacity",
+                "keyframes": [
+                  {
+                    "time": 0.0,
+                    "value": 1.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_ai",
+        "name": "Character - AI",
+        "type": "Character",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_ai_appearance",
+            "name": "AI Appearance",
+            "startTime": 10.0,
+            "duration": 35.0,
+            "assetPath": "assets/images/char_ai.png",
+            "propertyTracks": [
+              {
+                "propertyName": "position.x",
+                "displayName": "Position X",
+                "keyframes": [
+                  {
+                    "time": 10.0,
+                    "value": 1440.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              },
+              {
+                "propertyName": "position.y",
+                "displayName": "Position Y",
+                "keyframes": [
+                  {
+                    "time": 10.0,
+                    "value": 540.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              },
+              {
+                "propertyName": "opacity",
+                "displayName": "Opacity",
+                "keyframes": [
+                  {
+                    "time": 10.0,
+                    "value": 0.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 11.5,
+                    "value": 1.0,
+                    "interpolation": "EaseIn"
+                  }
+                ]
+              },
+              {
+                "propertyName": "scale",
+                "displayName": "Scale",
+                "keyframes": [
+                  {
+                    "time": 10.0,
+                    "value": 0.8,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 11.5,
+                    "value": 1.0,
+                    "interpolation": "EaseOut"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_camera",
+        "name": "Camera",
+        "type": "Camera",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_camera_shake",
+            "name": "Camera Shake (AI appears)",
+            "startTime": 10.0,
+            "duration": 0.5,
+            "propertyTracks": [
+              {
+                "propertyName": "shake.intensity",
+                "displayName": "Shake Intensity",
+                "keyframes": [
+                  {
+                    "time": 10.0,
+                    "value": 0.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 10.2,
+                    "value": 5.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 10.5,
+                    "value": 0.0,
+                    "interpolation": "EaseOut"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_sfx_choice",
+        "name": "Sound Effects",
+        "type": "SFX",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_sfx_tension",
+            "name": "Tension Click",
+            "startTime": 10.0,
+            "duration": 0.1,
+            "assetPath": "assets/audio/sfx/sfx_click.wav"
+          }
+        ]
+      }
+    ],
+    "markers": [
+      {
+        "time": 0.0,
+        "label": "Scene Start"
+      },
+      {
+        "time": 10.0,
+        "label": "AI Reveals Itself"
+      },
+      {
+        "time": 40.0,
+        "label": "Player Choice Point"
+      }
+    ]
+  },
+  "objects": [],
+  "metadata": {
+    "description": "Critical choice scene with AI character reveal and camera effects",
+    "lastModified": "2024-01-15T10:35:00Z",
+    "author": "NovelMind Engine"
+  }
+}

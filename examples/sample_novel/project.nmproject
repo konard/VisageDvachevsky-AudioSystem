@@ -1,0 +1,145 @@
+{
+  "name": "Sample Novel - End-to-End Example",
+  "version": "1.0.0",
+  "author": "NovelMind Team",
+  "description": "Comprehensive example demonstrating all NovelMind engine features: assets, localization, audio, animation, UI, and diagnostics",
+
+  "engine": {
+    "version": "1.0",
+    "minVersion": "1.0"
+  },
+
+  "project": {
+    "startScene": "intro",
+    "defaultResolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "aspectRatio": "16:9"
+  },
+
+  "localization": {
+    "locales": ["en", "ru"],
+    "defaultLocale": "en",
+    "localizationPath": "localization/",
+    "files": {
+      "en": "localization/en.json",
+      "ru": "localization/ru.json"
+    },
+    "fallbackBehavior": "useDefault",
+    "showMissingKeys": true
+  },
+
+  "assets": {
+    "basePath": "assets/",
+    "images": {
+      "path": "assets/images/",
+      "formats": ["png", "jpg"]
+    },
+    "audio": {
+      "path": "assets/audio/",
+      "music": {
+        "path": "assets/audio/music/",
+        "formats": ["wav", "ogg", "mp3"]
+      },
+      "sfx": {
+        "path": "assets/audio/sfx/",
+        "formats": ["wav", "ogg"]
+      },
+      "voice": {
+        "path": "assets/audio/voice/",
+        "formats": ["wav", "ogg"]
+      }
+    },
+    "fonts": {
+      "path": "assets/fonts/",
+      "defaultFont": "default"
+    }
+  },
+
+  "scripts": {
+    "path": "scripts/",
+    "entryPoint": "scripts/main.nms",
+    "files": [
+      "scripts/main.nms",
+      "scripts/scene_intro.nms",
+      "scripts/scene_choice.nms",
+      "scripts/scene_end.nms"
+    ],
+    "compileOnLoad": true
+  },
+
+  "scenes": {
+    "path": "scenes/",
+    "files": [
+      "scenes/intro.nmscene",
+      "scenes/choice.nmscene",
+      "scenes/ending.nmscene"
+    ]
+  },
+
+  "audio": {
+    "masterVolume": 1.0,
+    "channels": {
+      "music": {
+        "volume": 0.7,
+        "fadeDefault": 1.0
+      },
+      "voice": {
+        "volume": 1.0,
+        "duckMusic": true,
+        "duckAmount": 0.3
+      },
+      "sfx": {
+        "volume": 0.8
+      },
+      "ui": {
+        "volume": 0.6
+      }
+    }
+  },
+
+  "animation": {
+    "defaultDuration": 0.5,
+    "defaultEasing": "EaseInOut",
+    "fps": 30
+  },
+
+  "timeline": {
+    "frameRate": 30.0,
+    "snapToGrid": true,
+    "gridSize": 0.1,
+    "showMarkers": true
+  },
+
+  "ui": {
+    "theme": "default",
+    "textSpeed": 50,
+    "autoAdvanceDelay": 2.0,
+    "skipReadText": true
+  },
+
+  "diagnostics": {
+    "enabled": true,
+    "showWarnings": true,
+    "checkMissingAssets": true,
+    "checkMissingLocalization": true,
+    "validateScripts": true
+  },
+
+  "build": {
+    "outputPath": "build/",
+    "compression": true,
+    "encryption": false,
+    "includeDebugSymbols": false
+  },
+
+  "metadata": {
+    "created": "2024-01-15T10:00:00Z",
+    "lastModified": "2024-01-15T10:45:00Z",
+    "tags": ["example", "sci-fi", "tutorial", "comprehensive"],
+    "genre": "Science Fiction",
+    "playTime": "10-15 minutes",
+    "contentRating": "E (Everyone)"
+  }
+}

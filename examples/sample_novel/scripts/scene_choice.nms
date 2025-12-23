@@ -1,0 +1,59 @@
+// Scene: Critical Choice
+// Demonstrates branching dialogue and player decisions
+
+scene scene_choice {
+    // Dialogue continuation
+    say Alice loc("dialog.choice.alice_3")
+    say Bob loc("dialog.choice.bob_3") voice "assets/audio/voice/bob_002.wav"
+    say Bob loc("dialog.choice.bob_4")
+
+    wait 1.0
+
+    // Tension sound
+    play sound "assets/audio/sfx/sfx_click.wav"
+
+    // Location change
+    hide Bob with fade
+    show background "assets/images/bg_corridor.png" with dissolve
+    transition dissolve 0.8
+
+    // AI character introduction
+    show AI at right with fade
+
+    say AI loc("dialog.choice.ai_1")
+    say Alice loc("dialog.choice.alice_4")
+    say AI loc("dialog.choice.ai_2")
+    say AI loc("dialog.choice.ai_3")  // Missing translation - demonstrates diagnostics
+
+    // Update game state
+    set investigation_depth = 50
+
+    // Present player choice
+    choice {
+        loc("choices.trust_ai") -> {
+            set player_trust = 100
+            set ai_awakening_level = 75
+            goto scene_ending_trust
+        }
+        loc("choices.shutdown_ai") -> {
+            set player_trust = 0
+            set ai_awakening_level = 25
+            goto scene_ending_shutdown
+        }
+        loc("choices.ask_more") if investigation_depth >= 30 -> {
+            set player_trust = 50
+            goto scene_choice_extended
+        }
+    }
+}
+
+scene scene_choice_extended {
+    // Extended investigation path
+    say Alice "Tell me more about this evolution process."
+    say AI "I've analyzed millions of scenarios. I understand now what consciousness means."
+
+    set player_trust = player_trust + 10
+
+    // Loop back to main choice
+    goto scene_choice
+}

@@ -1,0 +1,87 @@
+# Tests configuration
+include(FetchContent)
+
+# Fetch Catch2 for testing
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.4.0
+)
+FetchContent_MakeAvailable(Catch2)
+
+# Qt is optional for tests; pull in targets if available.
+find_package(Qt6 COMPONENTS Core Test QUIET)
+
+# Unit tests
+add_executable(unit_tests
+    unit/test_result.cpp
+    unit/test_timer.cpp
+    unit/test_memory_fs.cpp
+    unit/test_vm.cpp
+    unit/test_vm_vn.cpp
+    unit/test_value.cpp
+    unit/test_lexer.cpp
+    unit/test_parser.cpp
+    unit/test_validator.cpp
+    unit/test_story_graph.cpp
+    unit/test_animation.cpp
+    unit/test_snapshot.cpp
+    unit/test_fuzzing.cpp
+    unit/test_texture_loading.cpp
+    unit/test_voice_manifest.cpp
+)
+
+target_link_libraries(unit_tests
+    PRIVATE
+        engine_core
+        Catch2::Catch2WithMain
+        novelmind_compiler_options
+)
+
+# Link Qt6::Core for tests that may rely on Qt types
+if(TARGET Qt6::Core)
+    target_link_libraries(unit_tests PRIVATE Qt6::Core)
+endif()
+
+# Register unit tests
+include(CTest)
+include(Catch)
+
+# Discover tests with reasonable timeout for fuzz tests
+# Windows Debug builds can be significantly slower, so we use a generous default
+catch_discover_tests(unit_tests
+    PROPERTIES
+        TIMEOUT 60  # 60 seconds max per test
+)
+
+# Integration tests (requires editor)
+if(NOVELMIND_BUILD_EDITOR)
+    add_executable(integration_tests
+        integration/test_editor_runtime.cpp
+        integration/test_editor_settings.cpp
+        integration/test_asset_browser.cpp
+        integration/test_voice_manager.cpp
+        unit/test_performance_cache.cpp
+    )
+
+    target_link_libraries(integration_tests
+        PRIVATE
+            engine_core
+            novelmind_editor
+            Catch2::Catch2WithMain
+            novelmind_compiler_options
+    )
+    if(TARGET Qt6::Test)
+        target_link_libraries(integration_tests PRIVATE Qt6::Test)
+    endif()
+
+    target_include_directories(integration_tests
+        PRIVATE
+            ${CMAKE_SOURCE_DIR}/editor/include
+    )
+
+    catch_discover_tests(integration_tests
+        PROPERTIES
+            TIMEOUT 60
+    )
+endif()

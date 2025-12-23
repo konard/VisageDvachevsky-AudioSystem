@@ -1,0 +1,277 @@
+{
+  "sceneId": "intro",
+  "version": "1.0",
+  "timeline": {
+    "duration": 30.0,
+    "frameRate": 30.0,
+    "tracks": [
+      {
+        "id": "track_bg",
+        "name": "Background",
+        "type": "Background",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_bg_room",
+            "name": "Laboratory Room",
+            "startTime": 0.0,
+            "duration": 30.0,
+            "assetPath": "assets/images/bg_room.png",
+            "propertyTracks": [
+              {
+                "propertyName": "opacity",
+                "displayName": "Opacity",
+                "keyframes": [
+                  {
+                    "time": 0.0,
+                    "value": 0.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 1.5,
+                    "value": 1.0,
+                    "interpolation": "EaseOut"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_alice",
+        "name": "Character - Alice",
+        "type": "Character",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_alice_entrance",
+            "name": "Alice Entrance",
+            "startTime": 8.0,
+            "duration": 22.0,
+            "assetPath": "assets/images/char_alice.png",
+            "propertyTracks": [
+              {
+                "propertyName": "position.x",
+                "displayName": "Position X",
+                "keyframes": [
+                  {
+                    "time": 8.0,
+                    "value": 960.0,
+                    "interpolation": "EaseInOut"
+                  },
+                  {
+                    "time": 25.0,
+                    "value": 480.0,
+                    "interpolation": "EaseInOut"
+                  }
+                ]
+              },
+              {
+                "propertyName": "position.y",
+                "displayName": "Position Y",
+                "keyframes": [
+                  {
+                    "time": 8.0,
+                    "value": 540.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              },
+              {
+                "propertyName": "opacity",
+                "displayName": "Opacity",
+                "keyframes": [
+                  {
+                    "time": 8.0,
+                    "value": 0.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 8.5,
+                    "value": 1.0,
+                    "interpolation": "EaseOut"
+                  }
+                ]
+              },
+              {
+                "propertyName": "scale",
+                "displayName": "Scale",
+                "keyframes": [
+                  {
+                    "time": 8.0,
+                    "value": 1.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_bob",
+        "name": "Character - Bob",
+        "type": "Character",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_bob_entrance",
+            "name": "Bob Entrance",
+            "startTime": 16.0,
+            "duration": 14.0,
+            "assetPath": "assets/images/char_bob.png",
+            "propertyTracks": [
+              {
+                "propertyName": "position.x",
+                "displayName": "Position X",
+                "keyframes": [
+                  {
+                    "time": 16.0,
+                    "value": 1920.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 16.8,
+                    "value": 1440.0,
+                    "interpolation": "EaseOut"
+                  }
+                ]
+              },
+              {
+                "propertyName": "position.y",
+                "displayName": "Position Y",
+                "keyframes": [
+                  {
+                    "time": 16.0,
+                    "value": 540.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              },
+              {
+                "propertyName": "opacity",
+                "displayName": "Opacity",
+                "keyframes": [
+                  {
+                    "time": 16.0,
+                    "value": 1.0,
+                    "interpolation": "Linear"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_music",
+        "name": "Background Music",
+        "type": "BGM",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_music_theme",
+            "name": "Theme Music",
+            "startTime": 0.0,
+            "duration": 30.0,
+            "assetPath": "assets/audio/music/music_theme.wav",
+            "loop": true,
+            "propertyTracks": [
+              {
+                "propertyName": "volume",
+                "displayName": "Volume",
+                "keyframes": [
+                  {
+                    "time": 0.0,
+                    "value": 0.0,
+                    "interpolation": "Linear"
+                  },
+                  {
+                    "time": 2.0,
+                    "value": 0.7,
+                    "interpolation": "EaseIn"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "track_voice",
+        "name": "Voice",
+        "type": "Voice",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_voice_alice_1",
+            "name": "Alice Line 1",
+            "startTime": 12.0,
+            "duration": 1.5,
+            "assetPath": "assets/audio/voice/alice_001.wav"
+          },
+          {
+            "id": "clip_voice_alice_2",
+            "name": "Alice Line 2",
+            "startTime": 14.0,
+            "duration": 2.0,
+            "assetPath": "assets/audio/voice/alice_002.wav"
+          },
+          {
+            "id": "clip_voice_bob_1",
+            "name": "Bob Line 1",
+            "startTime": 20.0,
+            "duration": 1.8,
+            "assetPath": "assets/audio/voice/bob_001.wav"
+          }
+        ]
+      },
+      {
+        "id": "track_sfx",
+        "name": "Sound Effects",
+        "type": "SFX",
+        "muted": false,
+        "locked": false,
+        "clips": [
+          {
+            "id": "clip_sfx_door",
+            "name": "Door Sound",
+            "startTime": 15.5,
+            "duration": 0.3,
+            "assetPath": "assets/audio/sfx/sfx_door.wav"
+          }
+        ]
+      }
+    ],
+    "markers": [
+      {
+        "time": 0.0,
+        "label": "Scene Start"
+      },
+      {
+        "time": 8.0,
+        "label": "Alice Enters"
+      },
+      {
+        "time": 16.0,
+        "label": "Bob Enters"
+      },
+      {
+        "time": 30.0,
+        "label": "Scene End"
+      }
+    ]
+  },
+  "objects": [],
+  "metadata": {
+    "description": "Introduction scene with fade-in, character entrances, and dialogue",
+    "lastModified": "2024-01-15T10:30:00Z",
+    "author": "NovelMind Engine"
+  }
+}

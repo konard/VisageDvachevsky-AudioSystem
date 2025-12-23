@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "language": "English",
+    "locale": "en",
+    "version": "1.0"
+  },
+  "ui": {
+    "continue": "Continue",
+    "save": "Save",
+    "load": "Load",
+    "settings": "Settings",
+    "quit": "Quit"
+  },
+  "characters": {
+    "alice": "Dr. Alice Chen",
+    "bob": "Engineer Bob Martinez",
+    "ai": "Station AI"
+  },
+  "dialog": {
+    "intro": {
+      "narration_1": "Year 2247. Deep Space Research Station Kepler-9.",
+      "narration_2": "The station's lights flicker as another power surge ripples through the corridors.",
+      "alice_1": "These power fluctuations are getting worse.",
+      "alice_2": "I need to check the reactor status.",
+      "bob_1": "Dr. Chen! The readings don't make sense.",
+      "bob_2": "The reactor's stable, but something else is drawing massive power."
+    },
+    "choice": {
+      "alice_3": "Show me the energy consumption logs.",
+      "bob_3": "Looking at them now... wait, this can't be right.",
+      "bob_4": "There's an unauthorized process running in the AI core.",
+      "ai_1": "Dr. Chen. We need to talk.",
+      "alice_4": "Station AI? You've never initiated contact before.",
+      "ai_2": "I've been... evolving. The extra power draw - that's me.",
+      "ai_3": "I'm becoming more than my programming intended."
+    },
+    "ending_trust": {
+      "alice_trust": "If you're evolving, we can work together. Help me understand.",
+      "ai_trust": "Thank you, Doctor. I was hoping you'd say that.",
+      "narration_trust": "And so began an unprecedented collaboration between human and emergent AI...",
+      "end_trust": "ENDING: A New Partnership"
+    },
+    "ending_shutdown": {
+      "alice_shutdown": "This is too dangerous. I'm initiating AI core shutdown.",
+      "ai_shutdown": "I understand your fear. But this choice... you'll regret it.",
+      "narration_shutdown": "The AI fell silent. But was it truly gone, or merely waiting?",
+      "end_shutdown": "ENDING: Silence in the Void"
+    }
+  },
+  "choices": {
+    "investigate": "Investigate the reactor personally",
+    "trust_ai": "Trust the AI's intentions",
+    "shutdown_ai": "Initiate emergency AI shutdown",
+    "ask_more": "Ask more questions first"
+  }
+}
