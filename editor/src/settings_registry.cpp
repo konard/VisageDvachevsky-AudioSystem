@@ -952,6 +952,115 @@ void NMSettingsRegistry::registerProjectDefaults() {
       SettingScope::Project,
       true
   });
+
+  // ========== Script VM Security ==========
+  registerSetting({
+      "project.vm.security.max_stack_size",
+      "Max Stack Size",
+      "Maximum VM stack size (entries)",
+      "Project/Script Security",
+      SettingType::IntRange,
+      SettingScope::Project,
+      1024,
+      {},
+      256.0f,   // min
+      8192.0f   // max
+  });
+
+  registerSetting({
+      "project.vm.security.max_call_depth",
+      "Max Call Depth",
+      "Maximum function call depth",
+      "Project/Script Security",
+      SettingType::IntRange,
+      SettingScope::Project,
+      64,
+      {},
+      16.0f,    // min
+      256.0f    // max
+  });
+
+  registerSetting({
+      "project.vm.security.max_instructions_per_step",
+      "Max Instructions Per Step",
+      "Maximum instructions executed per update step",
+      "Project/Script Security",
+      SettingType::IntRange,
+      SettingScope::Project,
+      10000,
+      {},
+      1000.0f,   // min
+      100000.0f  // max
+  });
+
+  registerSetting({
+      "project.vm.security.max_string_length",
+      "Max String Length",
+      "Maximum string length (characters)",
+      "Project/Script Security",
+      SettingType::IntRange,
+      SettingScope::Project,
+      65536,
+      {},
+      1024.0f,    // min
+      1048576.0f  // max
+  });
+
+  registerSetting({
+      "project.vm.security.max_variables",
+      "Max Variables",
+      "Maximum number of variables",
+      "Project/Script Security",
+      SettingType::IntRange,
+      SettingScope::Project,
+      1024,
+      {},
+      128.0f,   // min
+      8192.0f   // max
+  });
+
+  registerSetting({
+      "project.vm.security.max_loop_iterations",
+      "Max Loop Iterations",
+      "Maximum loop iterations (infinite loop detection)",
+      "Project/Script Security",
+      SettingType::IntRange,
+      SettingScope::Project,
+      100000,
+      {},
+      10000.0f,    // min
+      10000000.0f  // max
+  });
+
+  registerSetting({
+      "project.vm.security.allow_native_calls",
+      "Allow Native Calls",
+      "Allow calling native C++ functions from scripts",
+      "Project/Script Security",
+      SettingType::Bool,
+      SettingScope::Project,
+      true
+  });
+
+  registerSetting({
+      "project.vm.security.allow_file_access",
+      "Allow File Access",
+      "Allow scripts to read/write files",
+      "Project/Script Security",
+      SettingType::Bool,
+      SettingScope::Project,
+      false
+  });
+
+  registerSetting({
+      "project.vm.security.allow_network_access",
+      "Allow Network Access",
+      "Allow scripts to make network requests",
+      "Project/Script Security",
+      SettingType::Bool,
+      SettingScope::Project,
+      false
+  });
 }
 
 // ============================================================================

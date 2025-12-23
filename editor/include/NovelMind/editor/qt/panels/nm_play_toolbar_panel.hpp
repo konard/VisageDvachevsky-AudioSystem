@@ -44,6 +44,7 @@ private:
   QPushButton *m_pauseButton = nullptr;
   QPushButton *m_stopButton = nullptr;
   QPushButton *m_stepButton = nullptr;
+  QPushButton *m_skipButton = nullptr;
   QPushButton *m_saveButton = nullptr;
   QPushButton *m_loadButton = nullptr;
   QPushButton *m_autoSaveButton = nullptr;

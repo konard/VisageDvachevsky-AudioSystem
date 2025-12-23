@@ -87,6 +87,9 @@ public:
   /// Check if auto-save exists
   bool hasAutoSave() const;
 
+  /// Get access to the script runtime (for advanced operations)
+  scripting::ScriptRuntime *getScriptRuntime();
+
   /// Load a project into runtime
   bool loadProject(const QString &projectPath,
                    const QString &scriptsPath = QString(),

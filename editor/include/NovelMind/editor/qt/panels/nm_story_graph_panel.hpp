@@ -380,6 +380,7 @@ private slots:
   void onZoomOut();
   void onZoomReset();
   void onFitToGraph();
+  void onAutoLayout();
   void onCurrentNodeChanged(const QString &nodeId);
   void onBreakpointsChanged();
   void onNodeTypeSelected(const QString &nodeType);

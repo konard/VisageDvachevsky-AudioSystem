@@ -102,12 +102,37 @@ void NMPlayToolbarPanel::setupUI() {
   connect(m_stepButton, &QPushButton::clicked,
           []() { NMPlayModeController::instance().stepForward(); });
 
+  // Skip Mode Toggle button
+  m_skipButton = new QPushButton;
+  m_skipButton->setObjectName("SkipButton");
+  m_skipButton->setIcon(iconMgr.getIcon("fast-forward", 24));
+  m_skipButton->setText("Skip");
+  m_skipButton->setToolTip("Toggle skip mode (fast forward through dialogue)");
+  m_skipButton->setCheckable(true);
+  m_skipButton->setChecked(false);
+  m_skipButton->setFlat(true);
+  connect(m_skipButton, &QPushButton::toggled, [this](bool checked) {
+    auto &controller = NMPlayModeController::instance();
+    if (controller.isRuntimeLoaded()) {
+      auto *runtime = controller.getScriptRuntime();
+      if (runtime) {
+        runtime->setSkipMode(checked);
+      }
+    }
+    if (checked) {
+      showTransientStatus("Skip mode enabled", "#2196f3");
+    } else {
+      showTransientStatus("Skip mode disabled", "#a0a0a0");
+    }
+  });
+
   // Add buttons to toolbar
   toolbar->addWidget(m_playButton);
   toolbar->addWidget(m_pauseButton);
   toolbar->addWidget(m_stopButton);
   toolbar->addSeparator();
   toolbar->addWidget(m_stepButton);
+  toolbar->addWidget(m_skipButton);
   toolbar->addSeparator();
 
   QLabel *slotLabel = new QLabel("Slot");
