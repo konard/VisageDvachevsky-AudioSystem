@@ -152,6 +152,22 @@ void NMDiagnosticsPanel::addDiagnosticWithLocation(const QString &type,
       item->setText(2, QString("Node: %1").arg(parts[1]));
     }
     item->setText(3, QString("-"));
+  } else if (location.startsWith("Asset:", Qt::CaseInsensitive)) {
+    QStringList parts = location.split(':');
+    if (parts.size() >= 2) {
+      item->setText(2, parts[1]);
+    }
+    item->setText(3, QString("-"));
+  } else if (location.startsWith("File:", Qt::CaseInsensitive)) {
+    QStringList parts = location.split(':');
+    if (parts.size() >= 2) {
+      item->setText(2, parts[1]);
+    }
+    if (parts.size() >= 3) {
+      item->setText(3, parts[2]);
+    } else {
+      item->setText(3, QString("-"));
+    }
   }
 
   // Store the full location string

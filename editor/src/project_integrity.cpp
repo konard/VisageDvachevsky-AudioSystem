@@ -345,6 +345,30 @@ void ProjectIntegrityChecker::checkProjectConfiguration(
     return;
   }
 
+  // Check version compatibility
+  auto &pm = ProjectManager::instance();
+  if (pm.hasOpenProject()) {
+    const auto &metadata = pm.getMetadata();
+    std::string projectVersion = metadata.engineVersion;
+    std::string currentVersion = "0.2.0"; // Should be from a constant
+
+    if (!projectVersion.empty() && projectVersion != currentVersion) {
+      // Simple version comparison - could be more sophisticated
+      IntegrityIssue issue;
+      issue.severity = IssueSeverity::Warning;
+      issue.category = IssueCategory::Configuration;
+      issue.code = "C004";
+      issue.message = "Project was created with engine version " +
+                      projectVersion + " (current: " + currentVersion + ")";
+      issue.filePath = projectFile.string();
+      issue.suggestions.push_back(
+          "Update project to current engine version");
+      issue.suggestions.push_back(
+          "Some features may not work as expected");
+      issues.push_back(issue);
+    }
+  }
+
   // Check for required folders
   std::vector<std::pair<std::string, std::string>> requiredFolders = {
       {"Assets", "Assets folder"},
@@ -406,11 +430,46 @@ void ProjectIntegrityChecker::checkSceneReferences(
     return;
   }
 
-  // Collect all scene IDs
+  // Collect all scene IDs and check for serialization errors
   std::unordered_set<std::string> sceneIds;
   for (const auto &entry : fs::recursive_directory_iterator(scenesDir)) {
     if (entry.path().extension() == ".nmscene") {
-      sceneIds.insert(entry.path().stem().string());
+      std::string sceneId = entry.path().stem().string();
+      sceneIds.insert(sceneId);
+
+      // Check if scene file can be read (basic serialization check)
+      std::string content;
+      if (!readFileToString(entry.path(), content)) {
+        IntegrityIssue issue;
+        issue.severity = IssueSeverity::Error;
+        issue.category = IssueCategory::Scene;
+        issue.code = "S003";
+        issue.message = "Failed to read scene file: " + sceneId;
+        issue.filePath = entry.path().string();
+        issue.suggestions.push_back("Check file permissions");
+        issue.suggestions.push_back("File may be corrupted");
+        issues.push_back(issue);
+        continue;
+      }
+
+      // Basic JSON validation - check for balanced braces
+      int braceCount = 0;
+      for (char c : content) {
+        if (c == '{') braceCount++;
+        else if (c == '}') braceCount--;
+      }
+      if (braceCount != 0) {
+        IntegrityIssue issue;
+        issue.severity = IssueSeverity::Error;
+        issue.category = IssueCategory::Scene;
+        issue.code = "S004";
+        issue.message = "Scene file has malformed JSON: " + sceneId;
+        issue.filePath = entry.path().string();
+        issue.context = "Unbalanced braces detected";
+        issue.suggestions.push_back("Check JSON syntax");
+        issue.suggestions.push_back("Restore from backup if corrupted");
+        issues.push_back(issue);
+      }
     }
   }
 

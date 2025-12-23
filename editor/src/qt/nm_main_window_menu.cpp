@@ -57,6 +57,18 @@ void NMMainWindow::setupMenuBar() {
   m_actionExit->setToolTip(tr("Exit the editor"));
 
   // =========================================================================
+  // Project Menu
+  // =========================================================================
+  QMenu *projectMenu = menuBar->addMenu(tr("&Project"));
+
+  m_actionValidateProject = projectMenu->addAction(
+      iconMgr.getIcon("panel-diagnostics", 16), tr("&Validate Project"));
+  m_actionValidateProject->setShortcut(
+      QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_V));
+  m_actionValidateProject->setToolTip(
+      tr("Run full project integrity validation"));
+
+  // =========================================================================
   // Edit Menu
   // =========================================================================
   QMenu *editMenu = menuBar->addMenu(tr("&Edit"));

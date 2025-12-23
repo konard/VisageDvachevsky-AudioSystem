@@ -1,4 +1,5 @@
 #include "NovelMind/editor/project_manager.hpp"
+#include "NovelMind/editor/project_integrity.hpp"
 #include "NovelMind/editor/scene_document.hpp"
 #include <algorithm>
 #include <chrono>
@@ -577,16 +578,77 @@ ProjectValidation ProjectManager::validateProject() const {
     return validation;
   }
 
-  // Check folder structure
-  if (!verifyFolderStructure()) {
-    validation.warnings.push_back("Some project folders are missing");
+  // Use ProjectIntegrityChecker for comprehensive validation
+  ProjectIntegrityChecker checker;
+  checker.setProjectPath(m_projectPath);
+
+  // Configure for full validation
+  IntegrityCheckConfig config;
+  config.checkScenes = true;
+  config.checkAssets = true;
+  config.checkVoiceLines = true;
+  config.checkLocalization = true;
+  config.checkStoryGraph = true;
+  config.checkScripts = true;
+  config.checkResources = true;
+  config.checkConfiguration = true;
+  config.reportUnreferencedAssets = true;
+  config.reportUnreachableNodes = true;
+  config.reportCycles = true;
+  config.reportMissingTranslations = true;
+  checker.setConfig(config);
+
+  // Run validation
+  IntegrityReport report = checker.runFullCheck();
+
+  // Convert IntegrityReport to ProjectValidation
+  validation.valid = report.passed;
+
+  for (const auto &issue : report.issues) {
+    std::string location;
+    if (!issue.filePath.empty()) {
+      location = issue.filePath;
+      if (issue.lineNumber > 0) {
+        location += ":" + std::to_string(issue.lineNumber);
+      }
+    }
+
+    std::string message = issue.message;
+    if (!location.empty()) {
+      message += " (" + location + ")";
+    }
+
+    switch (issue.severity) {
+    case IssueSeverity::Critical:
+    case IssueSeverity::Error:
+      validation.errors.push_back(message);
+      break;
+    case IssueSeverity::Warning:
+      validation.warnings.push_back(message);
+      break;
+    case IssueSeverity::Info:
+      // Info messages are not included in basic validation
+      break;
+    }
+
+    // Track missing assets and scripts
+    if (issue.category == IssueCategory::Asset &&
+        issue.code == "A002") {
+      // Extract asset name from message
+      size_t pos = message.find("not found: ");
+      if (pos != std::string::npos) {
+        validation.missingAssets.push_back(message.substr(pos + 11));
+      }
+    }
+    if (issue.category == IssueCategory::Scene &&
+        issue.code == "S002") {
+      // Extract scene name from message
+      size_t pos = message.find("undefined scene: ");
+      if (pos != std::string::npos) {
+        validation.missingScripts.push_back(message.substr(pos + 17));
+      }
+    }
   }
-
-  // Check for missing assets (referenced but not found)
-  // This would scan scripts and scenes for asset references
-
-  // Check for missing scripts
-  // This would scan scene files for script references
 
   return validation;
 }

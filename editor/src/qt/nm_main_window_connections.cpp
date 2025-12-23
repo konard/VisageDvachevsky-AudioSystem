@@ -1,4 +1,6 @@
 #include "NovelMind/editor/qt/nm_main_window.hpp"
+#include "NovelMind/editor/project_integrity.hpp"
+#include "NovelMind/editor/project_manager.hpp"
 #include "NovelMind/editor/qt/nm_dialogs.hpp"
 #include "NovelMind/editor/qt/nm_hotkeys_dialog.hpp"
 #include "NovelMind/editor/qt/nm_play_mode_controller.hpp"
@@ -42,6 +44,94 @@ void NMMainWindow::setupConnections() {
   connect(m_actionSaveProject, &QAction::triggered, this,
           &NMMainWindow::saveProjectRequested);
   connect(m_actionExit, &QAction::triggered, this, &QMainWindow::close);
+
+  // Project menu
+  connect(m_actionValidateProject, &QAction::triggered, this, [this]() {
+    auto &pm = ProjectManager::instance();
+    if (!pm.hasOpenProject()) {
+      setStatusMessage(tr("No project is open"), 3000);
+      return;
+    }
+
+    setStatusMessage(tr("Running project validation..."));
+    m_diagnosticsPanel->clearDiagnostics();
+
+    // Run validation using ProjectIntegrityChecker
+    ProjectIntegrityChecker checker;
+    checker.setProjectPath(pm.getProjectPath());
+
+    // Configure for full validation
+    IntegrityCheckConfig config;
+    config.checkScenes = true;
+    config.checkAssets = true;
+    config.checkVoiceLines = true;
+    config.checkLocalization = true;
+    config.checkStoryGraph = true;
+    config.checkScripts = true;
+    config.checkResources = true;
+    config.checkConfiguration = true;
+    config.reportUnreferencedAssets = true;
+    config.reportUnreachableNodes = true;
+    config.reportCycles = true;
+    config.reportMissingTranslations = true;
+    checker.setConfig(config);
+
+    IntegrityReport report = checker.runFullCheck();
+
+    // Display results in Diagnostics panel
+    for (const auto &issue : report.issues) {
+      QString type;
+      switch (issue.severity) {
+      case IssueSeverity::Critical:
+      case IssueSeverity::Error:
+        type = "Error";
+        break;
+      case IssueSeverity::Warning:
+        type = "Warning";
+        break;
+      case IssueSeverity::Info:
+        type = "Info";
+        break;
+      }
+
+      QString message = QString::fromStdString(issue.message);
+      if (!issue.context.empty()) {
+        message += " - " + QString::fromStdString(issue.context);
+      }
+
+      // Build location string for navigation
+      QString location;
+      if (issue.category == IssueCategory::Script ||
+          issue.category == IssueCategory::Scene) {
+        location = "Script:" + QString::fromStdString(issue.filePath);
+        if (issue.lineNumber > 0) {
+          location += ":" + QString::number(issue.lineNumber);
+        }
+      } else if (issue.category == IssueCategory::Asset) {
+        location = "Asset:" + QString::fromStdString(issue.filePath);
+      } else if (!issue.filePath.empty()) {
+        location = "File:" + QString::fromStdString(issue.filePath);
+      }
+
+      m_diagnosticsPanel->addDiagnosticWithLocation(type, message, location);
+    }
+
+    // Show diagnostics panel
+    m_diagnosticsPanel->show();
+    m_diagnosticsPanel->raise();
+
+    // Update status
+    if (report.passed) {
+      setStatusMessage(tr("Validation passed - no critical issues found"),
+                       5000);
+    } else {
+      setStatusMessage(
+          tr("Validation found %1 error(s) and %2 warning(s)")
+              .arg(report.summary.errorCount + report.summary.criticalCount)
+              .arg(report.summary.warningCount),
+          5000);
+    }
+  });
 
   // Edit menu - connect to undo manager
   connect(m_actionUndo, &QAction::triggered, &NMUndoManager::instance(),
