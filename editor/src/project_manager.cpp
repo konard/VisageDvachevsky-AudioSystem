@@ -1,5 +1,6 @@
 #include "NovelMind/editor/project_manager.hpp"
 #include "NovelMind/editor/project_integrity.hpp"
+#include "NovelMind/editor/project_json.hpp"
 #include "NovelMind/editor/scene_document.hpp"
 #include <algorithm>
 #include <chrono>
@@ -818,50 +819,11 @@ void ProjectManager::setOnUnsavedChangesPrompt(
 // ============================================================================
 
 Result<void> ProjectManager::loadProjectFile(const std::string &path) {
-  std::ifstream file(path);
-  if (!file.is_open()) {
-    return Result<void>::error("Failed to open project file: " + path);
-  }
-
-  // Simple JSON parsing (in production, use a proper JSON library)
-  std::stringstream buffer;
-  buffer << file.rdbuf();
-  std::string content = buffer.str();
-
-  // Parse name
-  auto namePos = content.find("\"name\"");
-  if (namePos != std::string::npos) {
-    auto colonPos = content.find(':', namePos);
-    auto quoteStart = content.find('"', colonPos);
-    auto quoteEnd = content.find('"', quoteStart + 1);
-    if (quoteStart != std::string::npos && quoteEnd != std::string::npos) {
-      m_metadata.name =
-          content.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
-    }
-  }
-
-  // Parse version
-  auto versionPos = content.find("\"version\"");
-  if (versionPos != std::string::npos) {
-    auto colonPos = content.find(':', versionPos);
-    auto quoteStart = content.find('"', colonPos);
-    auto quoteEnd = content.find('"', quoteStart + 1);
-    if (quoteStart != std::string::npos && quoteEnd != std::string::npos) {
-      m_metadata.version =
-          content.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
-    }
-  }
-
-  // Parse startScene
-  auto startScenePos = content.find("\"startScene\"");
-  if (startScenePos != std::string::npos) {
-    auto colonPos = content.find(':', startScenePos);
-    auto quoteStart = content.find('"', colonPos);
-    auto quoteEnd = content.find('"', quoteStart + 1);
-    if (quoteStart != std::string::npos && quoteEnd != std::string::npos) {
-      m_metadata.startScene =
-          content.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
-    }
+  // Use robust JSON parser with validation
+  auto result = ProjectJsonHandler::loadFromFile(path, m_metadata);
+  if (result.isError()) {
+    return Result<void>::error("Failed to load project file: " + path + " - " +
+                               result.error());
   }
 
   return Result<void>::ok();
@@ -872,26 +834,11 @@ Result<void> ProjectManager::saveProjectFile() {
 
   fs::path projectFile = fs::path(m_projectPath) / "project.json";
 
-  std::ofstream file(projectFile);
-  if (!file.is_open()) {
-    return Result<void>::error("Failed to open project file for writing");
+  // Use atomic write with validation
+  auto result = ProjectJsonHandler::saveToFile(projectFile.string(), m_metadata);
+  if (result.isError()) {
+    return Result<void>::error("Failed to save project file: " + result.error());
   }
-
-  // Write JSON (in production, use a proper JSON library)
-  file << "{\n";
-  file << "  \"name\": \"" << m_metadata.name << "\",\n";
-  file << "  \"version\": \"" << m_metadata.version << "\",\n";
-  file << "  \"author\": \"" << m_metadata.author << "\",\n";
-  file << "  \"description\": \"" << m_metadata.description << "\",\n";
-  file << "  \"engineVersion\": \"" << m_metadata.engineVersion << "\",\n";
-  file << "  \"createdAt\": " << m_metadata.createdAt << ",\n";
-  file << "  \"modifiedAt\": " << m_metadata.modifiedAt << ",\n";
-  file << "  \"startScene\": \"" << m_metadata.startScene << "\",\n";
-  file << "  \"defaultLocale\": \"" << m_metadata.defaultLocale << "\",\n";
-  file << "  \"targetResolution\": \"" << m_metadata.targetResolution << "\"\n";
-  file << "}\n";
-
-  file.close();
 
   return Result<void>::ok();
 }

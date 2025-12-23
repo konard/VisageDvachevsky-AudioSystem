@@ -55,6 +55,7 @@ add_library(novelmind_editor STATIC
     src/error_reporter.cpp
     src/hotkeys_manager.cpp
     src/project_integrity.cpp
+    src/project_json.cpp
 
     # Performance optimization components
     src/qt/lazy_thumbnail_loader.cpp
