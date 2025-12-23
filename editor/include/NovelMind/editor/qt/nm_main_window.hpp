@@ -23,6 +23,10 @@ class QAction;
 class QActionGroup;
 class QLabel;
 
+namespace NovelMind::editor {
+class NMSettingsRegistry;
+}
+
 namespace NovelMind::editor::qt {
 
 // Forward declarations
@@ -199,6 +203,11 @@ public slots:
    * @brief Show the about dialog
    */
   void showAboutDialog();
+
+  /**
+   * @brief Show the settings dialog
+   */
+  void showSettingsDialog();
 
   /**
    * @brief Toggle panel visibility
@@ -392,6 +401,9 @@ private:
   QTimer *m_updateTimer = nullptr;
   bool m_initialized = false;
   static constexpr int UPDATE_INTERVAL_MS = 16; // ~60 FPS
+
+  // Settings system
+  std::unique_ptr<editor::NMSettingsRegistry> m_settingsRegistry;
 };
 
 } // namespace NovelMind::editor::qt

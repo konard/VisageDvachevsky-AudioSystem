@@ -5,6 +5,7 @@
 
 #include "NovelMind/editor/qt/nm_settings_dialog.hpp"
 #include "NovelMind/core/logger.hpp"
+#include <set>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDoubleSpinBox>
