@@ -69,6 +69,10 @@ void NMMainWindow::setupConnections() {
   m_actionUndo->setEnabled(NMUndoManager::instance().canUndo());
   m_actionRedo->setEnabled(NMUndoManager::instance().canRedo());
 
+  // Preferences action
+  connect(m_actionPreferences, &QAction::triggered, this,
+          &NMMainWindow::showSettingsDialog);
+
   // View menu - panel toggles
   connect(m_actionToggleSceneView, &QAction::toggled, m_sceneViewPanel,
           &QDockWidget::setVisible);
