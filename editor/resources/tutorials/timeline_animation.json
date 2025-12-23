@@ -1,0 +1,65 @@
+{
+  "id": "timeline_animation",
+  "title": "Timeline & Animation",
+  "description": "Learn how to create animations using the timeline and curve editors",
+  "icon": "film",
+  "category": "workflow",
+  "showOnFirstRun": false,
+  "showOnPanelOpen": true,
+  "triggerPanel": "timeline",
+  "duration": 90,
+  "tags": ["timeline", "animation", "keyframes", "curves"],
+  "steps": [
+    {
+      "id": "timeline_intro",
+      "anchor": "timeline.root",
+      "title": "Timeline Panel",
+      "content": "The Timeline lets you animate properties over time. Create smooth transitions for positions, opacity, colors, and more.",
+      "placement": "top",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "playhead",
+      "anchor": "timeline.playhead",
+      "title": "Playhead",
+      "content": "The playhead shows the current time position. Drag it to scrub through your animation, or use playback controls.",
+      "placement": "top",
+      "highlight": "pulse"
+    },
+    {
+      "id": "keyframe_area",
+      "anchor": "timeline.keyframe_area",
+      "title": "Keyframes",
+      "content": "Keyframes mark property values at specific times. Double-click to add a keyframe at the current playhead position.",
+      "details": "Tip: Select an object first, then add keyframes for its properties.",
+      "placement": "top",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "tracks",
+      "anchor": "timeline.track_list",
+      "title": "Animation Tracks",
+      "content": "Each track controls a different property. Expand tracks to see individual keyframes and adjust timing.",
+      "placement": "right",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "curve_editor",
+      "anchor": "curve_editor.root",
+      "title": "Curve Editor",
+      "content": "The Curve Editor gives you precise control over animation easing. Adjust Bezier handles to create smooth or snappy motion.",
+      "placement": "top",
+      "highlight": "spotlight",
+      "showWhen": { "panel": "curve_editor" }
+    },
+    {
+      "id": "curve_handles",
+      "anchor": "curve_editor.curve_area",
+      "title": "Bezier Curves",
+      "content": "Drag curve handles to control acceleration and deceleration. Steeper curves = faster motion, flatter = slower.",
+      "placement": "top",
+      "highlight": "spotlight",
+      "showWhen": { "panel": "curve_editor" }
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "id": "create_scene",
+  "title": "Create a Scene",
+  "description": "Learn how to create a scene and add dialogue to your visual novel",
+  "icon": "layout",
+  "category": "getting_started",
+  "showOnFirstRun": false,
+  "duration": 60,
+  "tags": ["scene", "dialogue", "basics"],
+  "steps": [
+    {
+      "id": "intro",
+      "anchor": "",
+      "title": "Creating Scenes & Dialogue",
+      "content": "Scenes are the building blocks of your visual novel. Each scene contains characters, backgrounds, and dialogue.",
+      "placement": "center",
+      "highlight": "none"
+    },
+    {
+      "id": "hierarchy_add",
+      "anchor": "hierarchy.add_button",
+      "title": "Add a New Object",
+      "content": "Click the + button to add objects to your scene. You can add characters, text boxes, images, and more.",
+      "placement": "right",
+      "highlight": "pulse"
+    },
+    {
+      "id": "scene_palette",
+      "anchor": "scene_palette.root",
+      "title": "Scene Palette",
+      "content": "The Scene Palette provides quick access to common scene objects. Drag items from here to the Scene View.",
+      "placement": "right",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "select_object",
+      "anchor": "scene_view.root",
+      "title": "Select & Move Objects",
+      "content": "Click objects in the Scene View to select them. Drag to reposition, or use the Inspector for precise control.",
+      "placement": "bottom",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "inspector_props",
+      "anchor": "inspector.property_grid",
+      "title": "Edit Properties",
+      "content": "With an object selected, modify its properties in the Inspector. Change text, colors, opacity, and animation settings.",
+      "placement": "left",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "story_node",
+      "anchor": "story_graph.add_node_button",
+      "title": "Add Dialogue Nodes",
+      "content": "Switch to the Story Graph to add dialogue. Right-click to create nodes, then connect them to define the flow.",
+      "placement": "bottom",
+      "highlight": "pulse"
+    }
+  ]
+}

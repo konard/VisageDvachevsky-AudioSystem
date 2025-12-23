@@ -6,4 +6,12 @@
         <file>icons/branch-closed.svg</file>
         <file>icons/dropdown.svg</file>
     </qresource>
+    <qresource prefix="/tutorials">
+        <file alias="getting_started.json">tutorials/getting_started.json</file>
+        <file alias="create_scene.json">tutorials/create_scene.json</file>
+        <file alias="localization.json">tutorials/localization.json</file>
+        <file alias="voice_audio.json">tutorials/voice_audio.json</file>
+        <file alias="timeline_animation.json">tutorials/timeline_animation.json</file>
+        <file alias="build_project.json">tutorials/build_project.json</file>
+    </qresource>
 </RCC>

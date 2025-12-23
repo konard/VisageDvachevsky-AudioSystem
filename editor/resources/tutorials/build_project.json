@@ -1,0 +1,62 @@
+{
+  "id": "build_project",
+  "title": "Build & Export",
+  "description": "Learn how to build and export your visual novel project",
+  "icon": "package",
+  "category": "workflow",
+  "showOnFirstRun": false,
+  "showOnPanelOpen": true,
+  "triggerPanel": "build_settings",
+  "duration": 60,
+  "tags": ["build", "export", "publish", "deploy"],
+  "steps": [
+    {
+      "id": "build_settings",
+      "anchor": "build_settings.root",
+      "title": "Build Settings",
+      "content": "Configure how your project is built and packaged for distribution.",
+      "placement": "left",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "platform_select",
+      "anchor": "build_settings.platform_selector",
+      "title": "Select Platform",
+      "content": "Choose the target platform: Windows, macOS, Linux, Web, or mobile. Each platform has specific requirements.",
+      "placement": "left",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "build_options",
+      "anchor": "build_settings.options_panel",
+      "title": "Build Options",
+      "content": "Configure resolution, window mode, compression settings, and other platform-specific options.",
+      "placement": "left",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "validation",
+      "anchor": "build_settings.validate_button",
+      "title": "Validate Project",
+      "content": "Click Validate to check for errors before building. This catches missing assets, broken links, and other issues.",
+      "placement": "bottom",
+      "highlight": "pulse"
+    },
+    {
+      "id": "build_button",
+      "anchor": "build_settings.build_button",
+      "title": "Start Build",
+      "content": "Click Build to start the build process. Progress and any warnings will appear in the console.",
+      "placement": "bottom",
+      "highlight": "pulse"
+    },
+    {
+      "id": "output_folder",
+      "anchor": "build_settings.output_path",
+      "title": "Output Location",
+      "content": "The built project will be saved to this location. Click the folder icon to change the output directory.",
+      "placement": "left",
+      "highlight": "spotlight"
+    }
+  ]
+}

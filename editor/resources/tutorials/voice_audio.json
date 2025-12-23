@@ -1,0 +1,65 @@
+{
+  "id": "voice_audio",
+  "title": "Voice & Audio",
+  "description": "Learn how to manage voice files and record audio for your visual novel",
+  "icon": "mic",
+  "category": "workflow",
+  "showOnFirstRun": false,
+  "showOnPanelOpen": true,
+  "triggerPanel": "voice_manager",
+  "duration": 90,
+  "tags": ["voice", "audio", "recording", "sound"],
+  "steps": [
+    {
+      "id": "voice_manager",
+      "anchor": "voice_manager.root",
+      "title": "Voice Manager",
+      "content": "The Voice Manager links audio files to dialogue in your story. Preview and organize voice recordings here.",
+      "placement": "left",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "voice_list",
+      "anchor": "voice_manager.voice_list",
+      "title": "Voice Files",
+      "content": "Each row represents a dialogue line. Link voice files by dragging audio assets or clicking the browse button.",
+      "placement": "left",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "preview_button",
+      "anchor": "voice_manager.play_button",
+      "title": "Preview Audio",
+      "content": "Click the play button to preview a voice file. This helps verify the correct audio is linked.",
+      "placement": "right",
+      "highlight": "pulse"
+    },
+    {
+      "id": "voice_studio",
+      "anchor": "voice_studio.root",
+      "title": "Voice Studio",
+      "content": "Use the Voice Studio to record new audio directly in the editor. Useful for placeholder or final recordings.",
+      "placement": "left",
+      "highlight": "spotlight",
+      "showWhen": { "panel": "voice_studio" }
+    },
+    {
+      "id": "recording",
+      "anchor": "voice_studio.record_button",
+      "title": "Record Audio",
+      "content": "Click the record button to start recording. Speak clearly and click again to stop.",
+      "placement": "bottom",
+      "highlight": "pulse",
+      "showWhen": { "panel": "voice_studio" }
+    },
+    {
+      "id": "audio_mixer",
+      "anchor": "audio_mixer.root",
+      "title": "Audio Mixer",
+      "content": "The Audio Mixer controls volume levels for voice, music, and sound effects during playback.",
+      "placement": "left",
+      "highlight": "spotlight",
+      "showWhen": { "panel": "audio_mixer" }
+    }
+  ]
+}

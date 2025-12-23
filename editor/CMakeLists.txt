@@ -91,6 +91,13 @@ add_library(novelmind_editor STATIC
     src/qt/nm_undo_manager.cpp
     src/qt/nm_icon_manager.cpp
 
+    # Tutorial/Help System
+    src/qt/nm_anchor_registry.cpp
+    src/qt/nm_help_overlay.cpp
+    src/qt/nm_tutorial_manager.cpp
+    src/qt/nm_context_help.cpp
+    src/qt/nm_main_window_tutorials.cpp
+
     # Phase 0 & 1 panels
     src/qt/panels/nm_scene_view_panel.cpp
     src/qt/panels/nm_scene_view_panel_objects.cpp
@@ -160,6 +167,13 @@ add_library(novelmind_editor STATIC
     include/NovelMind/editor/qt/nm_undo_manager.hpp
     include/NovelMind/editor/qt/nm_icon_manager.hpp
     include/NovelMind/editor/qt/nm_play_mode_controller.hpp
+
+    # Tutorial/Help System headers
+    include/NovelMind/editor/qt/nm_anchor_registry.hpp
+    include/NovelMind/editor/qt/nm_tutorial_types.hpp
+    include/NovelMind/editor/qt/nm_tutorial_manager.hpp
+    include/NovelMind/editor/qt/nm_help_overlay.hpp
+    include/NovelMind/editor/qt/nm_context_help.hpp
 
     # Panel headers
     include/NovelMind/editor/qt/panels/nm_scene_view_panel.hpp

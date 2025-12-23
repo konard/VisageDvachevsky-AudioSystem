@@ -1,0 +1,78 @@
+{
+  "id": "getting_started",
+  "title": "Getting Started",
+  "description": "Learn the basics of the NovelMind Editor interface and workflow",
+  "icon": "help-circle",
+  "category": "getting_started",
+  "showOnFirstRun": true,
+  "duration": 90,
+  "tags": ["intro", "basics", "first-run"],
+  "steps": [
+    {
+      "id": "welcome",
+      "anchor": "",
+      "title": "Welcome to NovelMind",
+      "content": "This quick tour will introduce you to the key areas of the editor. You can exit at any time by pressing Escape or clicking the X button.",
+      "details": "NovelMind is a visual novel engine designed for professional narrative development.",
+      "placement": "center",
+      "highlight": "none",
+      "allowSkip": true
+    },
+    {
+      "id": "scene_view",
+      "anchor": "scene_view.root",
+      "title": "Scene View",
+      "content": "The Scene View shows your visual novel scenes in WYSIWYG mode. Here you can position characters, backgrounds, and UI elements.",
+      "placement": "right",
+      "highlight": "spotlight",
+      "allowSkip": true
+    },
+    {
+      "id": "story_graph",
+      "anchor": "story_graph.root",
+      "title": "Story Graph",
+      "content": "The Story Graph is where you build your narrative flow. Create dialogue nodes, choices, and branching paths using a visual node-based editor.",
+      "placement": "right",
+      "highlight": "spotlight",
+      "allowSkip": true
+    },
+    {
+      "id": "hierarchy",
+      "anchor": "hierarchy.root",
+      "title": "Hierarchy Panel",
+      "content": "The Hierarchy shows all objects in your current scene. Select objects here to edit their properties.",
+      "placement": "right",
+      "highlight": "spotlight",
+      "allowSkip": true
+    },
+    {
+      "id": "inspector",
+      "anchor": "inspector.root",
+      "title": "Inspector Panel",
+      "content": "When you select an object, its properties appear in the Inspector. Modify text, positions, animations, and more.",
+      "placement": "left",
+      "highlight": "spotlight",
+      "allowSkip": true
+    },
+    {
+      "id": "asset_browser",
+      "anchor": "asset_browser.root",
+      "title": "Asset Browser",
+      "content": "Your project assets (images, audio, scripts) are organized here. Drag assets into scenes or reference them in your story.",
+      "placement": "top",
+      "highlight": "spotlight",
+      "allowSkip": true
+    },
+    {
+      "id": "complete",
+      "anchor": "",
+      "title": "Ready to Create",
+      "content": "That covers the basics. Explore the Help menu for more tutorials on specific features like voice recording, localization, and animation.",
+      "placement": "center",
+      "highlight": "none",
+      "allowSkip": true,
+      "learnMoreUrl": "https://novelmind.dev/docs",
+      "learnMoreLabel": "Read the documentation"
+    }
+  ]
+}

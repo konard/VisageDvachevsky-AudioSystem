@@ -1,0 +1,62 @@
+{
+  "id": "localization",
+  "title": "Localization",
+  "description": "Learn how to manage multiple languages and translate your visual novel",
+  "icon": "globe",
+  "category": "workflow",
+  "showOnFirstRun": false,
+  "showOnPanelOpen": true,
+  "triggerPanel": "localization",
+  "duration": 75,
+  "tags": ["localization", "translation", "languages", "i18n"],
+  "steps": [
+    {
+      "id": "intro",
+      "anchor": "localization.root",
+      "title": "Localization Panel",
+      "content": "The Localization panel helps you manage translations for all text in your project.",
+      "placement": "left",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "string_table",
+      "anchor": "localization.string_table",
+      "title": "String Table",
+      "content": "All translatable strings appear here. Each row shows the key, source text, and translations for each language.",
+      "placement": "left",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "search_filter",
+      "anchor": "localization.search_bar",
+      "title": "Search & Filter",
+      "content": "Use the search bar to find specific strings. Filter by status to show only missing translations.",
+      "placement": "bottom",
+      "highlight": "pulse"
+    },
+    {
+      "id": "missing_filter",
+      "anchor": "localization.missing_filter",
+      "title": "Missing Translations",
+      "content": "Click here to show only strings that are missing translations. This helps prioritize translation work.",
+      "placement": "bottom",
+      "highlight": "pulse"
+    },
+    {
+      "id": "export_import",
+      "anchor": "localization.export_button",
+      "title": "Export & Import",
+      "content": "Export strings to CSV or XLIFF for external translation. Import completed translations back into the project.",
+      "placement": "bottom",
+      "highlight": "spotlight"
+    },
+    {
+      "id": "add_language",
+      "anchor": "localization.add_language_button",
+      "title": "Add Languages",
+      "content": "Click here to add a new target language. You can add as many languages as needed.",
+      "placement": "left",
+      "highlight": "pulse"
+    }
+  ]
+}
