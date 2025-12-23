@@ -1,0 +1,12 @@
+This is a placeholder file for the assets directory.
+
+In a real project, this directory would contain:
+- images/ - Background images, character sprites, UI elements
+- audio/ - Sound effects, background music, voice files
+- fonts/ - TTF/OTF font files
+
+The build system will:
+1. Scan this directory for all asset files
+2. Process and optimize them based on type
+3. Pack them into .nmres resource files
+4. Apply encryption if enabled (release builds)

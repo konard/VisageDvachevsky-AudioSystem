@@ -57,6 +57,10 @@ add_library(novelmind_editor STATIC
     src/project_integrity.cpp
     src/project_json.cpp
 
+    # Build System components
+    src/build_system.cpp
+    src/build_size_analyzer.cpp
+
     # Performance optimization components
     src/qt/lazy_thumbnail_loader.cpp
     src/qt/timeline_render_cache.cpp
@@ -182,6 +186,8 @@ add_library(novelmind_editor STATIC
     include/NovelMind/editor/qt/panels/nm_play_toolbar_panel.hpp
     include/NovelMind/editor/qt/panels/nm_debug_overlay_panel.hpp
     include/NovelMind/editor/qt/panels/nm_issues_panel.hpp
+    include/NovelMind/editor/qt/panels/nm_audio_mixer_panel.hpp
+    include/NovelMind/editor/qt/panels/nm_animation_adapter.hpp
 
     # Qt Resources
     resources/editor_resources.qrc

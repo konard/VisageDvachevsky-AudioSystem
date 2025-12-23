@@ -1,0 +1,21 @@
+{
+  "name": "Build Smoke Test",
+  "version": "1.0.0",
+  "description": "Minimal project for testing the build system",
+  "author": "NovelMind Team",
+  "nmscript_version": "1.0",
+  "settings": {
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "start_scene": "intro",
+    "default_locale": "en"
+  },
+  "locales": ["en"],
+  "build": {
+    "compress_assets": true,
+    "encrypt_assets": false,
+    "strip_unused": true
+  }
+}
