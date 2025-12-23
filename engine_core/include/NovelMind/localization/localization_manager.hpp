@@ -474,6 +474,8 @@ private:
                           const std::string &path) const;
   Result<void> exportPO(const StringTable &table,
                         const std::string &path) const;
+  Result<void> exportXLIFF(const StringTable &table,
+                           const std::string &path) const;
 
   StringTable &getOrCreateTable(const LocaleId &locale);
   void fireMissingString(const std::string &id, const LocaleId &locale) const;

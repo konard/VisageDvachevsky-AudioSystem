@@ -391,6 +391,8 @@ LocalizationManager::exportStrings(const LocaleId &locale,
     return exportJSON(it->second, filePath);
   case LocalizationFormat::PO:
     return exportPO(it->second, filePath);
+  case LocalizationFormat::XLIFF:
+    return exportXLIFF(it->second, filePath);
   default:
     return Result<void>::error("Unsupported export format");
   }
@@ -426,6 +428,8 @@ LocalizationManager::exportMissingStrings(const LocaleId &locale,
     return exportJSON(missingTable, filePath);
   case LocalizationFormat::PO:
     return exportPO(missingTable, filePath);
+  case LocalizationFormat::XLIFF:
+    return exportXLIFF(missingTable, filePath);
   default:
     return Result<void>::error("Unsupported export format");
   }
@@ -811,6 +815,70 @@ Result<void> LocalizationManager::exportPO(const StringTable &table,
       file << "\n";
     }
   }
+
+  return {};
+}
+
+Result<void> LocalizationManager::exportXLIFF(const StringTable &table,
+                                              const std::string &path) const {
+  std::ofstream file(path);
+  if (!file.is_open()) {
+    return Result<void>::error("Failed to open file for writing: " + path);
+  }
+
+  const std::string locale = table.getLocale().toString();
+
+  // XLIFF 1.2 format
+  file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  file << "<xliff version=\"1.2\" "
+          "xmlns=\"urn:oasis:names:tc:xliff:document:1.2\">\n";
+  file << "  <file source-language=\"en\" target-language=\"" << locale
+       << "\" datatype=\"plaintext\" original=\"NovelMind\">\n";
+  file << "    <body>\n";
+
+  for (const auto &id : table.getStringIds()) {
+    auto str = table.getString(id);
+    if (str) {
+      // XML escape special characters
+      std::string escapedId = id;
+      std::string escapedStr = *str;
+
+      auto escapeXml = [](std::string &text) {
+        size_t pos = 0;
+        while ((pos = text.find('&', pos)) != std::string::npos) {
+          text.replace(pos, 1, "&amp;");
+          pos += 5;
+        }
+        pos = 0;
+        while ((pos = text.find('<', pos)) != std::string::npos) {
+          text.replace(pos, 1, "&lt;");
+          pos += 4;
+        }
+        pos = 0;
+        while ((pos = text.find('>', pos)) != std::string::npos) {
+          text.replace(pos, 1, "&gt;");
+          pos += 4;
+        }
+        pos = 0;
+        while ((pos = text.find('"', pos)) != std::string::npos) {
+          text.replace(pos, 1, "&quot;");
+          pos += 6;
+        }
+      };
+
+      escapeXml(escapedId);
+      escapeXml(escapedStr);
+
+      file << "      <trans-unit id=\"" << escapedId << "\">\n";
+      file << "        <source>" << escapedId << "</source>\n";
+      file << "        <target>" << escapedStr << "</target>\n";
+      file << "      </trans-unit>\n";
+    }
+  }
+
+  file << "    </body>\n";
+  file << "  </file>\n";
+  file << "</xliff>\n";
 
   return {};
 }

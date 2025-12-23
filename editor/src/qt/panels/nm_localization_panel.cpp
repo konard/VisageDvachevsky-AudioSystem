@@ -1,8 +1,8 @@
 #include "NovelMind/editor/qt/panels/nm_localization_panel.hpp"
 #include "NovelMind/editor/project_manager.hpp"
 #include "NovelMind/editor/qt/nm_dialogs.hpp"
-#include "NovelMind/editor/qt/nm_undo_manager.hpp"
 #include "NovelMind/editor/qt/nm_style_manager.hpp"
+#include "NovelMind/editor/qt/nm_undo_manager.hpp"
 
 #include <QAbstractItemView>
 #include <QApplication>
@@ -15,8 +15,9 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFormLayout>
-#include <QHeaderView>
+#include <QFrame>
 #include <QHBoxLayout>
+#include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
@@ -26,7 +27,6 @@
 #include <QTableWidgetItem>
 #include <QToolBar>
 #include <QVBoxLayout>
-#include <QFrame>
 
 namespace NovelMind::editor::qt {
 
@@ -61,8 +61,9 @@ void NMLocalizationPanel::setupUI() {
 
   // Language selection group
   QLabel *langLabel = new QLabel(tr("Language:"), topToolbar);
-  langLabel->setStyleSheet(QString("color: %1; font-weight: 600;")
-                            .arg(NMStyleManager::colorToStyleString(palette.textSecondary)));
+  langLabel->setStyleSheet(
+      QString("color: %1; font-weight: 600;")
+          .arg(NMStyleManager::colorToStyleString(palette.textSecondary)));
   topLayout->addWidget(langLabel);
 
   m_languageSelector = new QComboBox(topToolbar);
@@ -87,18 +88,28 @@ void NMLocalizationPanel::setupUI() {
           &NMLocalizationPanel::exportLocale);
   topLayout->addWidget(m_exportButton);
 
+  m_exportMissingBtn = new QPushButton(tr("Export Missing..."), topToolbar);
+  m_exportMissingBtn->setToolTip(
+      tr("Export missing translations for current locale"));
+  connect(m_exportMissingBtn, &QPushButton::clicked, this,
+          &NMLocalizationPanel::onExportMissingClicked);
+  topLayout->addWidget(m_exportMissingBtn);
+
   m_saveBtn = new QPushButton(tr("Save"), topToolbar);
   m_saveBtn->setEnabled(false);
   m_saveBtn->setToolTip(tr("Save all changes"));
-  m_saveBtn->setStyleSheet(QString(
-      "QPushButton { background-color: %1; color: %2; font-weight: 600; }"
-      "QPushButton:hover { background-color: %3; }"
-      "QPushButton:disabled { background-color: %4; color: %5; }")
-      .arg(NMStyleManager::colorToStyleString(style.panelAccents().localization))
-      .arg(NMStyleManager::colorToStyleString(palette.textInverse))
-      .arg(NMStyleManager::colorToRgbaString(style.panelAccents().localization, 220))
-      .arg(NMStyleManager::colorToStyleString(palette.bgLight))
-      .arg(NMStyleManager::colorToStyleString(palette.textDisabled)));
+  m_saveBtn->setStyleSheet(
+      QString(
+          "QPushButton { background-color: %1; color: %2; font-weight: 600; }"
+          "QPushButton:hover { background-color: %3; }"
+          "QPushButton:disabled { background-color: %4; color: %5; }")
+          .arg(NMStyleManager::colorToStyleString(
+              style.panelAccents().localization))
+          .arg(NMStyleManager::colorToStyleString(palette.textInverse))
+          .arg(NMStyleManager::colorToRgbaString(
+              style.panelAccents().localization, 220))
+          .arg(NMStyleManager::colorToStyleString(palette.bgLight))
+          .arg(NMStyleManager::colorToStyleString(palette.textDisabled)));
   connect(m_saveBtn, &QPushButton::clicked, this,
           &NMLocalizationPanel::onSaveClicked);
   topLayout->addWidget(m_saveBtn);
@@ -109,12 +120,14 @@ void NMLocalizationPanel::setupUI() {
   QFrame *filterToolbar = new QFrame(contentWidget());
   filterToolbar->setFrameStyle(QFrame::NoFrame);
   QHBoxLayout *filterLayout = new QHBoxLayout(filterToolbar);
-  filterLayout->setContentsMargins(spacing.sm, spacing.sm, spacing.sm, spacing.sm);
+  filterLayout->setContentsMargins(spacing.sm, spacing.sm, spacing.sm,
+                                   spacing.sm);
   filterLayout->setSpacing(spacing.md);
 
   // Search box
   m_searchEdit = new QLineEdit(filterToolbar);
-  m_searchEdit->setPlaceholderText(tr("Search keys, source, or translations..."));
+  m_searchEdit->setPlaceholderText(
+      tr("Search keys, source, or translations..."));
   m_searchEdit->setClearButtonEnabled(true);
   connect(m_searchEdit, &QLineEdit::textChanged, this,
           &NMLocalizationPanel::onSearchTextChanged);
@@ -122,8 +135,9 @@ void NMLocalizationPanel::setupUI() {
 
   // Filter checkbox
   m_showMissingOnly = new QCheckBox(tr("Show Missing Only"), filterToolbar);
-  m_showMissingOnly->setStyleSheet(QString("QCheckBox { color: %1; }")
-      .arg(NMStyleManager::colorToStyleString(palette.warning)));
+  m_showMissingOnly->setStyleSheet(
+      QString("QCheckBox { color: %1; }")
+          .arg(NMStyleManager::colorToStyleString(palette.warning)));
   connect(m_showMissingOnly, &QCheckBox::toggled, this,
           &NMLocalizationPanel::onShowOnlyMissingToggled);
   filterLayout->addWidget(m_showMissingOnly);
@@ -132,35 +146,60 @@ void NMLocalizationPanel::setupUI() {
   QFrame *separator = new QFrame(filterToolbar);
   separator->setFrameShape(QFrame::VLine);
   separator->setFrameShadow(QFrame::Sunken);
-  separator->setStyleSheet(QString("color: %1;")
-      .arg(NMStyleManager::colorToStyleString(palette.borderDefault)));
+  separator->setStyleSheet(
+      QString("color: %1;")
+          .arg(NMStyleManager::colorToStyleString(palette.borderDefault)));
   filterLayout->addWidget(separator);
 
   // Edit operations group (Add/Delete)
   m_addKeyBtn = new QPushButton(tr("+ Add Key"), filterToolbar);
   m_addKeyBtn->setToolTip(tr("Add new localization key"));
-  m_addKeyBtn->setStyleSheet(QString(
-      "QPushButton { background-color: %1; color: %2; font-weight: 600; }"
-      "QPushButton:hover { background-color: %3; }")
-      .arg(NMStyleManager::colorToStyleString(palette.successSubtle))
-      .arg(NMStyleManager::colorToStyleString(palette.success))
-      .arg(NMStyleManager::colorToStyleString(palette.success)));
+  m_addKeyBtn->setStyleSheet(
+      QString(
+          "QPushButton { background-color: %1; color: %2; font-weight: 600; }"
+          "QPushButton:hover { background-color: %3; }")
+          .arg(NMStyleManager::colorToStyleString(palette.successSubtle))
+          .arg(NMStyleManager::colorToStyleString(palette.success))
+          .arg(NMStyleManager::colorToStyleString(palette.success)));
   connect(m_addKeyBtn, &QPushButton::clicked, this,
           &NMLocalizationPanel::onAddKeyClicked);
   filterLayout->addWidget(m_addKeyBtn);
 
   m_deleteKeyBtn = new QPushButton(tr("Delete Key"), filterToolbar);
   m_deleteKeyBtn->setToolTip(tr("Delete selected key(s)"));
-  m_deleteKeyBtn->setStyleSheet(QString(
-      "QPushButton { background-color: %1; color: %2; }"
-      "QPushButton:hover { background-color: %3; color: %4; }")
-      .arg(NMStyleManager::colorToStyleString(palette.bgMedium))
-      .arg(NMStyleManager::colorToStyleString(palette.error))
-      .arg(NMStyleManager::colorToStyleString(palette.errorSubtle))
-      .arg(NMStyleManager::colorToStyleString(palette.error)));
+  m_deleteKeyBtn->setStyleSheet(
+      QString("QPushButton { background-color: %1; color: %2; }"
+              "QPushButton:hover { background-color: %3; color: %4; }")
+          .arg(NMStyleManager::colorToStyleString(palette.bgMedium))
+          .arg(NMStyleManager::colorToStyleString(palette.error))
+          .arg(NMStyleManager::colorToStyleString(palette.errorSubtle))
+          .arg(NMStyleManager::colorToStyleString(palette.error)));
   connect(m_deleteKeyBtn, &QPushButton::clicked, this,
           &NMLocalizationPanel::onDeleteKeyClicked);
   filterLayout->addWidget(m_deleteKeyBtn);
+
+  // Add separator
+  QFrame *separator2 = new QFrame(filterToolbar);
+  separator2->setFrameShape(QFrame::VLine);
+  separator2->setFrameShadow(QFrame::Sunken);
+  separator2->setStyleSheet(
+      QString("color: %1;")
+          .arg(NMStyleManager::colorToStyleString(palette.borderDefault)));
+  filterLayout->addWidget(separator2);
+
+  // Plural Forms button
+  m_pluralFormsBtn = new QPushButton(tr("Plural Forms..."), filterToolbar);
+  m_pluralFormsBtn->setToolTip(tr("Edit plural forms for selected key"));
+  connect(m_pluralFormsBtn, &QPushButton::clicked, this,
+          &NMLocalizationPanel::onEditPluralFormsClicked);
+  filterLayout->addWidget(m_pluralFormsBtn);
+
+  // RTL Preview checkbox
+  m_rtlPreviewCheckbox = new QCheckBox(tr("RTL Preview"), filterToolbar);
+  m_rtlPreviewCheckbox->setToolTip(tr("Toggle right-to-left text preview"));
+  connect(m_rtlPreviewCheckbox, &QCheckBox::toggled, this,
+          &NMLocalizationPanel::onToggleRTLPreview);
+  filterLayout->addWidget(m_rtlPreviewCheckbox);
 
   layout->addWidget(filterToolbar);
 
@@ -187,64 +226,106 @@ void NMLocalizationPanel::setupUI() {
   m_stringsTable->setColumnWidth(1, 300); // Source column
 
   // Apply custom table styling
-  m_stringsTable->setStyleSheet(QString(
-      "QTableWidget {"
-      "  background-color: %1;"
-      "  gridline-color: %2;"
-      "  alternate-background-color: %3;"
-      "  border: 1px solid %4;"
-      "}"
-      "QTableWidget::item {"
-      "  padding: 6px 8px;"
-      "  color: %5;"
-      "  border: none;"
-      "}"
-      "QTableWidget::item:selected {"
-      "  background-color: %6;"
-      "  color: %7;"
-      "}"
-      "QTableWidget::item:hover {"
-      "  background-color: %8;"
-      "}"
-      "QHeaderView::section {"
-      "  background-color: %9;"
-      "  color: %10;"
-      "  padding: 6px 8px;"
-      "  border: none;"
-      "  border-right: 1px solid %2;"
-      "  border-bottom: 2px solid %11;"
-      "  font-weight: 600;"
-      "}")
-      .arg(NMStyleManager::colorToStyleString(palette.bgDark))
-      .arg(NMStyleManager::colorToStyleString(palette.borderDefault))
-      .arg(NMStyleManager::colorToStyleString(palette.bgMedium))
-      .arg(NMStyleManager::colorToStyleString(palette.borderLight))
-      .arg(NMStyleManager::colorToStyleString(palette.textPrimary))
-      .arg(NMStyleManager::colorToRgbaString(palette.accentPrimary, 80))
-      .arg(NMStyleManager::colorToStyleString(palette.textPrimary))
-      .arg(NMStyleManager::colorToRgbaString(palette.bgLight, 60))
-      .arg(NMStyleManager::colorToStyleString(palette.bgDarkest))
-      .arg(NMStyleManager::colorToStyleString(palette.textSecondary))
-      .arg(NMStyleManager::colorToStyleString(style.panelAccents().localization)));
+  m_stringsTable->setStyleSheet(
+      QString("QTableWidget {"
+              "  background-color: %1;"
+              "  gridline-color: %2;"
+              "  alternate-background-color: %3;"
+              "  border: 1px solid %4;"
+              "}"
+              "QTableWidget::item {"
+              "  padding: 6px 8px;"
+              "  color: %5;"
+              "  border: none;"
+              "}"
+              "QTableWidget::item:selected {"
+              "  background-color: %6;"
+              "  color: %7;"
+              "}"
+              "QTableWidget::item:hover {"
+              "  background-color: %8;"
+              "}"
+              "QHeaderView::section {"
+              "  background-color: %9;"
+              "  color: %10;"
+              "  padding: 6px 8px;"
+              "  border: none;"
+              "  border-right: 1px solid %2;"
+              "  border-bottom: 2px solid %11;"
+              "  font-weight: 600;"
+              "}")
+          .arg(NMStyleManager::colorToStyleString(palette.bgDark))
+          .arg(NMStyleManager::colorToStyleString(palette.borderDefault))
+          .arg(NMStyleManager::colorToStyleString(palette.bgMedium))
+          .arg(NMStyleManager::colorToStyleString(palette.borderLight))
+          .arg(NMStyleManager::colorToStyleString(palette.textPrimary))
+          .arg(NMStyleManager::colorToRgbaString(palette.accentPrimary, 80))
+          .arg(NMStyleManager::colorToStyleString(palette.textPrimary))
+          .arg(NMStyleManager::colorToRgbaString(palette.bgLight, 60))
+          .arg(NMStyleManager::colorToStyleString(palette.bgDarkest))
+          .arg(NMStyleManager::colorToStyleString(palette.textSecondary))
+          .arg(NMStyleManager::colorToStyleString(
+              style.panelAccents().localization)));
 
   connect(m_stringsTable, &QTableWidget::cellChanged, this,
           &NMLocalizationPanel::onCellChanged);
   connect(m_stringsTable, &QTableWidget::customContextMenuRequested, this,
           &NMLocalizationPanel::onContextMenu);
+  connect(m_stringsTable, &QTableWidget::itemSelectionChanged, this,
+          &NMLocalizationPanel::updatePreview);
   layout->addWidget(m_stringsTable, 1);
+
+  // Preview Panel with variable interpolation
+  m_previewPanel = new QWidget(contentWidget());
+  QHBoxLayout *previewLayout = new QHBoxLayout(m_previewPanel);
+  previewLayout->setContentsMargins(spacing.sm, spacing.sm, spacing.sm,
+                                    spacing.sm);
+  previewLayout->setSpacing(spacing.md);
+
+  QLabel *previewLabel =
+      new QLabel(tr("Preview with variables:"), m_previewPanel);
+  previewLabel->setStyleSheet(
+      QString("color: %1; font-weight: 600;")
+          .arg(NMStyleManager::colorToStyleString(palette.textSecondary)));
+  previewLayout->addWidget(previewLabel);
+
+  m_previewInput = new QLineEdit(m_previewPanel);
+  m_previewInput->setPlaceholderText(tr("e.g., name=John,count=5"));
+  m_previewInput->setToolTip(
+      tr("Enter variable values in format: var1=value1,var2=value2"));
+  connect(m_previewInput, &QLineEdit::textChanged, this,
+          &NMLocalizationPanel::onPreviewVariablesChanged);
+  previewLayout->addWidget(m_previewInput, 1);
+
+  m_previewOutput = new QLabel(m_previewPanel);
+  m_previewOutput->setStyleSheet(
+      QString("QLabel {"
+              "  color: %1;"
+              "  padding: 4px 8px;"
+              "  background-color: %2;"
+              "  border: 1px solid %3;"
+              "  border-radius: 3px;"
+              "}")
+          .arg(NMStyleManager::colorToStyleString(palette.textPrimary))
+          .arg(NMStyleManager::colorToStyleString(palette.bgMedium))
+          .arg(NMStyleManager::colorToStyleString(palette.borderDefault)));
+  m_previewOutput->setMinimumWidth(200);
+  previewLayout->addWidget(m_previewOutput, 1);
+
+  layout->addWidget(m_previewPanel);
 
   // Status bar with improved styling
   m_statusLabel = new QLabel(contentWidget());
-  m_statusLabel->setStyleSheet(QString(
-      "QLabel {"
-      "  color: %1;"
-      "  padding: 4px 8px;"
-      "  background-color: %2;"
-      "  border-top: 1px solid %3;"
-      "}")
-      .arg(NMStyleManager::colorToStyleString(palette.textSecondary))
-      .arg(NMStyleManager::colorToStyleString(palette.bgDarkest))
-      .arg(NMStyleManager::colorToStyleString(palette.borderDefault)));
+  m_statusLabel->setStyleSheet(
+      QString("QLabel {"
+              "  color: %1;"
+              "  padding: 4px 8px;"
+              "  background-color: %2;"
+              "  border-top: 1px solid %3;"
+              "}")
+          .arg(NMStyleManager::colorToStyleString(palette.textSecondary))
+          .arg(NMStyleManager::colorToStyleString(palette.bgDarkest))
+          .arg(NMStyleManager::colorToStyleString(palette.borderDefault)));
   layout->addWidget(m_statusLabel);
 
   refreshLocales();
@@ -327,11 +408,10 @@ void NMLocalizationPanel::loadLocale(const QString &localeCode) {
     dir.mkpath(".");
   }
 
-  QStringList candidates = {dir.filePath(localeCode + ".csv"),
-                            dir.filePath(localeCode + ".json"),
-                            dir.filePath(localeCode + ".po"),
-                            dir.filePath(localeCode + ".xliff"),
-                            dir.filePath(localeCode + ".xlf")};
+  QStringList candidates = {
+      dir.filePath(localeCode + ".csv"), dir.filePath(localeCode + ".json"),
+      dir.filePath(localeCode + ".po"), dir.filePath(localeCode + ".xliff"),
+      dir.filePath(localeCode + ".xlf")};
   for (const auto &path : candidates) {
     QFileInfo info(path);
     if (!info.exists()) {
@@ -391,9 +471,8 @@ void NMLocalizationPanel::syncEntriesFromManager() {
     }
 
     // Check if missing translation for current locale
-    entry.isMissing =
-        !entry.translations.contains(m_currentLocale) ||
-        entry.translations.value(m_currentLocale).isEmpty();
+    entry.isMissing = !entry.translations.contains(m_currentLocale) ||
+                      entry.translations.value(m_currentLocale).isEmpty();
 
     m_entries[entry.key] = entry;
   }
@@ -480,8 +559,10 @@ void NMLocalizationPanel::applyFilters() {
     return;
   }
 
-  const QString searchText = m_searchEdit ? m_searchEdit->text().toLower() : QString();
-  const bool showMissingOnly = m_showMissingOnly && m_showMissingOnly->isChecked();
+  const QString searchText =
+      m_searchEdit ? m_searchEdit->text().toLower() : QString();
+  const bool showMissingOnly =
+      m_showMissingOnly && m_showMissingOnly->isChecked();
 
   int visibleCount = 0;
   int missingCount = 0;
@@ -498,7 +579,8 @@ void NMLocalizationPanel::applyFilters() {
 
     const QString key = idItem->text();
     const QString source = sourceItem ? sourceItem->text() : QString();
-    const QString translation = translationItem ? translationItem->text() : QString();
+    const QString translation =
+        translationItem ? translationItem->text() : QString();
 
     bool isMissing = translation.isEmpty();
     if (isMissing) {
@@ -556,7 +638,7 @@ void NMLocalizationPanel::highlightMissingTranslations() {
       font.setItalic(true);
       translationItem->setFont(font);
     } else {
-      translationItem->setBackground(QBrush());  // Clear custom background
+      translationItem->setBackground(QBrush()); // Clear custom background
       translationItem->setForeground(normalText);
       QFont font = translationItem->font();
       font.setItalic(false);
@@ -618,30 +700,35 @@ void NMLocalizationPanel::updateStatusBar() {
 
   // Calculate completion percentage
   int completedCount = totalCount - missingCount;
-  int completionPercent = totalCount > 0 ? (completedCount * 100) / totalCount : 100;
+  int completionPercent =
+      totalCount > 0 ? (completedCount * 100) / totalCount : 100;
 
   // Build styled status message
   QString status;
 
   // Show visible/total keys
-  status += QString("<span style='color: %1;'>Showing <b>%2</b> of <b>%3</b> keys</span>")
-                .arg(NMStyleManager::colorToStyleString(palette.textSecondary))
-                .arg(visibleCount)
-                .arg(totalCount);
+  status +=
+      QString(
+          "<span style='color: %1;'>Showing <b>%2</b> of <b>%3</b> keys</span>")
+          .arg(NMStyleManager::colorToStyleString(palette.textSecondary))
+          .arg(visibleCount)
+          .arg(totalCount);
 
   // Show missing count with color coding
   if (missingCount > 0) {
-    status += QString(" <span style='color: %1;'>●</span> ")
-                  .arg(NMStyleManager::colorToStyleString(palette.borderDefault));
+    status +=
+        QString(" <span style='color: %1;'>●</span> ")
+            .arg(NMStyleManager::colorToStyleString(palette.borderDefault));
     status += QString("<span style='color: %1;'>Missing: <b>%2</b></span>")
                   .arg(NMStyleManager::colorToStyleString(palette.warning))
                   .arg(missingCount);
   }
 
   // Show completion percentage
-  QString completionColor = completionPercent == 100
-      ? NMStyleManager::colorToStyleString(palette.success)
-      : NMStyleManager::colorToStyleString(palette.info);
+  QString completionColor =
+      completionPercent == 100
+          ? NMStyleManager::colorToStyleString(palette.success)
+          : NMStyleManager::colorToStyleString(palette.info);
 
   status += QString(" <span style='color: %1;'>●</span> ")
                 .arg(NMStyleManager::colorToStyleString(palette.borderDefault));
@@ -651,10 +738,13 @@ void NMLocalizationPanel::updateStatusBar() {
 
   // Show modified indicator
   if (m_dirty) {
-    status += QString(" <span style='color: %1;'>●</span> ")
-                  .arg(NMStyleManager::colorToStyleString(palette.borderDefault));
-    status += QString("<span style='color: %1; font-weight: 600;'>● MODIFIED</span>")
-                  .arg(NMStyleManager::colorToStyleString(style.panelAccents().localization));
+    status +=
+        QString(" <span style='color: %1;'>●</span> ")
+            .arg(NMStyleManager::colorToStyleString(palette.borderDefault));
+    status +=
+        QString("<span style='color: %1; font-weight: 600;'>● MODIFIED</span>")
+            .arg(NMStyleManager::colorToStyleString(
+                style.panelAccents().localization));
   }
 
   m_statusLabel->setText(status);
@@ -778,39 +868,39 @@ bool NMLocalizationPanel::showAddKeyDialog(QString &outKey,
   layout->addLayout(formLayout);
   layout->addWidget(errorLabel);
 
-  QDialogButtonBox *buttonBox =
-      new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
-                           &dialog);
+  QDialogButtonBox *buttonBox = new QDialogButtonBox(
+      QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
   QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
   okButton->setEnabled(false);
 
   layout->addWidget(buttonBox);
 
   // Validation on key change
-  connect(keyEdit, &QLineEdit::textChanged, [this, okButton, errorLabel,
-                                             keyEdit](const QString &text) {
-    QString error;
-    bool valid = true;
+  connect(keyEdit, &QLineEdit::textChanged,
+          [this, okButton, errorLabel, keyEdit](const QString &text) {
+            QString error;
+            bool valid = true;
 
-    if (text.isEmpty()) {
-      valid = false;
-      error = tr("Key cannot be empty");
-    } else if (!isValidKeyName(text)) {
-      valid = false;
-      error = tr("Key must contain only letters, numbers, underscore, dot, or dash");
-    } else if (!isKeyUnique(text)) {
-      valid = false;
-      error = tr("Key already exists");
-    }
+            if (text.isEmpty()) {
+              valid = false;
+              error = tr("Key cannot be empty");
+            } else if (!isValidKeyName(text)) {
+              valid = false;
+              error = tr("Key must contain only letters, numbers, underscore, "
+                         "dot, or dash");
+            } else if (!isKeyUnique(text)) {
+              valid = false;
+              error = tr("Key already exists");
+            }
 
-    okButton->setEnabled(valid);
-    if (!valid && !text.isEmpty()) {
-      errorLabel->setText(error);
-      errorLabel->show();
-    } else {
-      errorLabel->hide();
-    }
-  });
+            okButton->setEnabled(valid);
+            if (!valid && !text.isEmpty()) {
+              errorLabel->setText(error);
+              errorLabel->show();
+            } else {
+              errorLabel->hide();
+            }
+          });
 
   connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
   connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
@@ -833,7 +923,7 @@ bool NMLocalizationPanel::isKeyUnique(const QString &key) const {
 }
 
 bool NMLocalizationPanel::addKey(const QString &key,
-                                  const QString &defaultValue) {
+                                 const QString &defaultValue) {
   if (key.isEmpty() || !isValidKeyName(key) || !isKeyUnique(key)) {
     return false;
   }
@@ -883,8 +973,8 @@ void NMLocalizationPanel::onDeleteKeyClicked() {
     message = tr("Are you sure you want to delete the key '%1'?")
                   .arg(*keysToDelete.begin());
   } else {
-    message = tr("Are you sure you want to delete %1 keys?")
-                  .arg(keysToDelete.size());
+    message =
+        tr("Are you sure you want to delete %1 keys?").arg(keysToDelete.size());
   }
 
   NMDialogButton result = NMMessageDialog::showQuestion(
@@ -1138,8 +1228,7 @@ void NMLocalizationPanel::importLocale() {
 
   NovelMind::localization::LocaleId locale;
   locale.language = localeCode.toStdString();
-  auto result =
-      m_localization.loadStrings(locale, path.toStdString(), format);
+  auto result = m_localization.loadStrings(locale, path.toStdString(), format);
   if (result.isError()) {
     NMMessageDialog::showError(this, tr("Import Failed"),
                                QString::fromStdString(result.error()));
@@ -1178,7 +1267,8 @@ void NMLocalizationPanel::onRefreshClicked() {
   if (m_dirty) {
     NMDialogButton result = NMMessageDialog::showQuestion(
         this, tr("Unsaved Changes"),
-        tr("You have unsaved changes. Do you want to discard them and refresh?"),
+        tr("You have unsaved changes. Do you want to discard them and "
+           "refresh?"),
         {NMDialogButton::Yes, NMDialogButton::No}, NMDialogButton::No);
 
     if (result != NMDialogButton::Yes) {
@@ -1205,15 +1295,17 @@ void NMLocalizationPanel::setupTable() {
 void NMLocalizationPanel::exportToCsv(const QString &filePath) {
   NovelMind::localization::LocaleId locale;
   locale.language = m_currentLocale.toStdString();
-  m_localization.exportStrings(locale, filePath.toStdString(),
-                               NovelMind::localization::LocalizationFormat::CSV);
+  m_localization.exportStrings(
+      locale, filePath.toStdString(),
+      NovelMind::localization::LocalizationFormat::CSV);
 }
 
 void NMLocalizationPanel::exportToJson(const QString &filePath) {
   NovelMind::localization::LocaleId locale;
   locale.language = m_currentLocale.toStdString();
-  m_localization.exportStrings(locale, filePath.toStdString(),
-                               NovelMind::localization::LocalizationFormat::JSON);
+  m_localization.exportStrings(
+      locale, filePath.toStdString(),
+      NovelMind::localization::LocalizationFormat::JSON);
 }
 
 void NMLocalizationPanel::importFromCsv(const QString &filePath) {
@@ -1232,6 +1324,236 @@ void NMLocalizationPanel::importFromJson(const QString &filePath) {
                              NovelMind::localization::LocalizationFormat::JSON);
   syncEntriesFromManager();
   rebuildTable();
+}
+
+void NMLocalizationPanel::onExportMissingClicked() { exportMissingStrings(); }
+
+void NMLocalizationPanel::exportMissingStrings() {
+  auto &pm = ProjectManager::instance();
+  if (!pm.hasOpenProject() || m_currentLocale.isEmpty()) {
+    return;
+  }
+
+  const QString localizationRoot =
+      QString::fromStdString(pm.getFolderPath(ProjectFolder::Localization));
+  const QString filter = tr("Localization (*.csv *.json *.po *.xliff *.xlf)");
+  const QString defaultName =
+      QDir(localizationRoot).filePath(m_currentLocale + "_missing.csv");
+  const QString path = QFileDialog::getSaveFileName(
+      this, tr("Export Missing Translations"), defaultName, filter);
+  if (path.isEmpty()) {
+    return;
+  }
+
+  syncEntriesToManager();
+
+  const QFileInfo info(path);
+  const auto format = formatForExtension(info.suffix());
+
+  NovelMind::localization::LocaleId locale;
+  locale.language = m_currentLocale.toStdString();
+  auto result =
+      m_localization.exportMissingStrings(locale, path.toStdString(), format);
+  if (result.isError()) {
+    NMMessageDialog::showError(this, tr("Export Failed"),
+                               QString::fromStdString(result.error()));
+  } else {
+    NMMessageDialog::showInfo(
+        this, tr("Export Successful"),
+        tr("Missing translations exported successfully to:\n%1").arg(path));
+  }
+}
+
+void NMLocalizationPanel::onEditPluralFormsClicked() {
+  if (!m_stringsTable) {
+    return;
+  }
+
+  QList<QTableWidgetItem *> selectedItems = m_stringsTable->selectedItems();
+  if (selectedItems.isEmpty()) {
+    NMMessageDialog::showInfo(this, tr("Edit Plural Forms"),
+                              tr("Please select a key to edit plural forms."));
+    return;
+  }
+
+  int row = selectedItems.first()->row();
+  auto *idItem = m_stringsTable->item(row, 0);
+  if (!idItem) {
+    return;
+  }
+
+  const QString key = idItem->text();
+  showPluralFormsDialog(key);
+}
+
+bool NMLocalizationPanel::showPluralFormsDialog(const QString &key) {
+  using namespace NovelMind::localization;
+
+  QDialog dialog(this);
+  dialog.setWindowTitle(tr("Edit Plural Forms - %1").arg(key));
+  dialog.setMinimumWidth(600);
+  dialog.setMinimumHeight(400);
+
+  QVBoxLayout *layout = new QVBoxLayout(&dialog);
+
+  // Instructions
+  QLabel *infoLabel = new QLabel(
+      tr("Define plural forms for different count values:\n"
+         "Zero (0), One (1), Two (2), Few (3-10), Many (11+), Other (default)"),
+      &dialog);
+  infoLabel->setWordWrap(true);
+  layout->addWidget(infoLabel);
+
+  // Get current localized string
+  LocaleId locale;
+  locale.language = m_currentLocale.toStdString();
+  auto *table = m_localization.getStringTableMutable(locale);
+
+  QHash<PluralCategory, QLineEdit *> formEdits;
+
+  QFormLayout *formLayout = new QFormLayout();
+
+  const QList<QPair<PluralCategory, QString>> categories = {
+      {PluralCategory::Zero, tr("Zero (count = 0):")},
+      {PluralCategory::One, tr("One (count = 1):")},
+      {PluralCategory::Two, tr("count = 2):")},
+      {PluralCategory::Few, tr("Few (3-10):")},
+      {PluralCategory::Many, tr("Many (11+):")},
+      {PluralCategory::Other, tr("Other (default):")}};
+
+  for (const auto &[category, label] : categories) {
+    QLineEdit *edit = new QLineEdit(&dialog);
+    if (table) {
+      const auto &strings = table->getStrings();
+      auto it = strings.find(key.toStdString());
+      if (it != strings.end()) {
+        auto formIt = it->second.forms.find(category);
+        if (formIt != it->second.forms.end()) {
+          edit->setText(QString::fromStdString(formIt->second));
+        }
+      }
+    }
+    formEdits[category] = edit;
+    formLayout->addRow(label, edit);
+  }
+
+  layout->addLayout(formLayout);
+
+  QDialogButtonBox *buttonBox = new QDialogButtonBox(
+      QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+  connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+  connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+  layout->addWidget(buttonBox);
+
+  if (dialog.exec() != QDialog::Accepted) {
+    return false;
+  }
+
+  // Save plural forms
+  if (table) {
+    std::unordered_map<PluralCategory, std::string> forms;
+    for (auto it = formEdits.begin(); it != formEdits.end(); ++it) {
+      const QString text = it.value()->text();
+      if (!text.isEmpty()) {
+        forms[it.key()] = text.toStdString();
+      }
+    }
+
+    if (!forms.empty()) {
+      table->addPluralString(key.toStdString(), forms);
+      setDirty(true);
+      syncEntriesFromManager();
+      rebuildTable();
+    }
+  }
+
+  return true;
+}
+
+void NMLocalizationPanel::onToggleRTLPreview(bool checked) {
+  applyRTLLayout(checked);
+}
+
+void NMLocalizationPanel::applyRTLLayout(bool rtl) {
+  if (!m_stringsTable) {
+    return;
+  }
+
+  Qt::LayoutDirection direction = rtl ? Qt::RightToLeft : Qt::LeftToRight;
+
+  // Apply to table
+  m_stringsTable->setLayoutDirection(direction);
+
+  // Apply to preview
+  if (m_previewOutput) {
+    m_previewOutput->setLayoutDirection(direction);
+  }
+
+  // Update alignment for translation column
+  for (int row = 0; row < m_stringsTable->rowCount(); ++row) {
+    auto *translationItem = m_stringsTable->item(row, 2);
+    if (translationItem) {
+      if (rtl) {
+        translationItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+      } else {
+        translationItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+      }
+    }
+  }
+}
+
+void NMLocalizationPanel::onPreviewVariablesChanged() {
+  if (!m_previewInput || !m_previewOutput) {
+    return;
+  }
+
+  // Parse variables from input (format: var1=value1,var2=value2)
+  m_previewVariables.clear();
+  const QString input = m_previewInput->text();
+  const QStringList pairs = input.split(',', Qt::SkipEmptyParts);
+
+  for (const QString &pair : pairs) {
+    const QStringList parts = pair.split('=');
+    if (parts.size() == 2) {
+      m_previewVariables[parts[0].trimmed()] = parts[1].trimmed();
+    }
+  }
+
+  updatePreview();
+}
+
+void NMLocalizationPanel::updatePreview() {
+  if (!m_previewOutput || !m_stringsTable) {
+    return;
+  }
+
+  // Get currently selected key
+  QList<QTableWidgetItem *> selectedItems = m_stringsTable->selectedItems();
+  if (selectedItems.isEmpty()) {
+    m_previewOutput->setText(tr("(select a key to preview)"));
+    return;
+  }
+
+  int row = selectedItems.first()->row();
+  auto *translationItem = m_stringsTable->item(row, 2);
+  if (!translationItem) {
+    m_previewOutput->setText("");
+    return;
+  }
+
+  QString text = translationItem->text();
+
+  // Apply variable interpolation
+  std::unordered_map<std::string, std::string> variables;
+  for (auto it = m_previewVariables.begin(); it != m_previewVariables.end();
+       ++it) {
+    variables[it.key().toStdString()] = it.value().toStdString();
+  }
+
+  std::string stdText = text.toStdString();
+  std::string interpolated = m_localization.interpolate(stdText, variables);
+
+  m_previewOutput->setText(QString::fromStdString(interpolated));
 }
 
 } // namespace NovelMind::editor::qt

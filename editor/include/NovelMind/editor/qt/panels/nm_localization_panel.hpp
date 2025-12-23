@@ -15,10 +15,10 @@
 #include "NovelMind/editor/qt/nm_dock_panel.hpp"
 #include "NovelMind/localization/localization_manager.hpp"
 
-#include <QWidget>
 #include <QHash>
 #include <QRegularExpression>
 #include <QSet>
+#include <QWidget>
 
 class QTableWidget;
 class QTableWidgetItem;
@@ -119,7 +119,7 @@ signals:
   void keySelected(const QString &key);
   void navigateToFile(const QString &filePath, int lineNumber);
   void translationChanged(const QString &key, const QString &locale,
-                           const QString &newValue);
+                          const QString &newValue);
   void dirtyStateChanged(bool dirty);
 
 private slots:
@@ -136,6 +136,10 @@ private slots:
   void onShowOnlyMissingToggled(bool checked);
   void onContextMenu(const QPoint &pos);
   void onSaveClicked();
+  void onExportMissingClicked();
+  void onEditPluralFormsClicked();
+  void onToggleRTLPreview(bool checked);
+  void onPreviewVariablesChanged();
 
 private:
   void setupUI();
@@ -160,6 +164,14 @@ private:
   void syncEntriesFromManager();
   void exportLocale();
   void importLocale();
+  void exportMissingStrings();
+  void importLocaleAsync(const QString &filePath,
+                         NovelMind::localization::LocalizationFormat format);
+  void exportLocaleAsync(const QString &filePath,
+                         NovelMind::localization::LocalizationFormat format);
+  bool showPluralFormsDialog(const QString &key);
+  void updatePreview();
+  void applyRTLLayout(bool rtl);
 
   // UI Elements
   QToolBar *m_toolbar = nullptr;
@@ -173,12 +185,21 @@ private:
   QPushButton *m_deleteKeyBtn = nullptr;
   QPushButton *m_importButton = nullptr;
   QPushButton *m_exportButton = nullptr;
+  QPushButton *m_exportMissingBtn = nullptr;
   QPushButton *m_refreshBtn = nullptr;
   QPushButton *m_saveBtn = nullptr;
+  QPushButton *m_pluralFormsBtn = nullptr;
+  QCheckBox *m_rtlPreviewCheckbox = nullptr;
+
+  // Preview Panel
+  QWidget *m_previewPanel = nullptr;
+  QLineEdit *m_previewInput = nullptr;
+  QLabel *m_previewOutput = nullptr;
+  QHash<QString, QString> m_previewVariables;
 
   // Data
   QHash<QString, LocalizationEntry> m_entries;
-  QSet<QString> m_deletedKeys;  // Keys pending deletion
+  QSet<QString> m_deletedKeys; // Keys pending deletion
   QStringList m_availableLocales;
   QString m_defaultLocale = "en";
   QString m_currentLocale;
