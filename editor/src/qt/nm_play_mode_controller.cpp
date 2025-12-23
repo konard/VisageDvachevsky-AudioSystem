@@ -379,6 +379,10 @@ bool NMPlayModeController::hasAutoSave() const {
   return m_runtimeHost.autoSaveExists();
 }
 
+scripting::ScriptRuntime *NMPlayModeController::getScriptRuntime() {
+  return m_runtimeHost.getScriptRuntime();
+}
+
 void NMPlayModeController::refreshRuntimeCache() {
   m_currentNodeId = QString::fromStdString(m_runtimeHost.getCurrentScene());
   emit currentNodeChanged(m_currentNodeId);

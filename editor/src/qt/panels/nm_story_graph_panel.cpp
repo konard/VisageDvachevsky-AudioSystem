@@ -283,6 +283,13 @@ void NMStoryGraphPanel::setupToolBar() {
   connect(actionFit, &QAction::triggered, this,
           &NMStoryGraphPanel::onFitToGraph);
 
+  m_toolBar->addSeparator();
+
+  QAction *actionAutoLayout = m_toolBar->addAction(tr("Auto Layout"));
+  actionAutoLayout->setToolTip(tr("Automatically arrange nodes (hierarchical layout)"));
+  connect(actionAutoLayout, &QAction::triggered, this,
+          &NMStoryGraphPanel::onAutoLayout);
+
   if (auto *layout = qobject_cast<QVBoxLayout *>(m_contentWidget->layout())) {
     layout->insertWidget(0, m_toolBar);
   }

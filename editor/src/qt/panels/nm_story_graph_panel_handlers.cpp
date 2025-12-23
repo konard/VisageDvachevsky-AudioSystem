@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QQueue>
 #include <QSet>
 #include <QTextStream>
 
@@ -38,6 +39,139 @@ void NMStoryGraphPanel::onFitToGraph() {
   if (m_view && m_scene && !m_scene->items().isEmpty()) {
     m_view->fitInView(m_scene->itemsBoundingRect().adjusted(-50, -50, 50, 50),
                       Qt::KeepAspectRatio);
+  }
+}
+
+void NMStoryGraphPanel::onAutoLayout() {
+  if (!m_scene) {
+    return;
+  }
+
+  const auto &nodes = m_scene->nodes();
+  if (nodes.isEmpty()) {
+    return;
+  }
+
+  // Ask for confirmation before rearranging
+  QMessageBox msgBox;
+  msgBox.setIcon(QMessageBox::Question);
+  msgBox.setWindowTitle(tr("Auto Layout"));
+  msgBox.setText(tr("This will automatically arrange all nodes in a hierarchical layout."));
+  msgBox.setInformativeText(tr("Current manual positioning will be lost. Do you want to continue?"));
+  msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+  msgBox.setDefaultButton(QMessageBox::No);
+
+  if (msgBox.exec() != QMessageBox::Yes) {
+    return;
+  }
+
+  // Simple hierarchical layout algorithm
+  // 1. Find entry nodes (nodes with no incoming connections or marked as entry)
+  // 2. Assign layers using breadth-first traversal
+  // 3. Position nodes in each layer horizontally with spacing
+
+  const qreal horizontalSpacing = 250.0;
+  const qreal verticalSpacing = 150.0;
+  const qreal startX = 100.0;
+  const qreal startY = 100.0;
+
+  // Build adjacency list
+  QHash<uint64_t, QList<uint64_t>> adjacencyList;
+  QHash<uint64_t, int> inDegree;
+
+  for (auto *node : nodes) {
+    adjacencyList[node->nodeId()] = QList<uint64_t>();
+    inDegree[node->nodeId()] = 0;
+  }
+
+  for (auto *conn : m_scene->connections()) {
+    uint64_t fromId = conn->startNode()->nodeId();
+    uint64_t toId = conn->endNode()->nodeId();
+    adjacencyList[fromId].append(toId);
+    inDegree[toId]++;
+  }
+
+  // Find entry nodes
+  QList<uint64_t> entryNodes;
+  for (auto *node : nodes) {
+    if (inDegree[node->nodeId()] == 0 || node->isEntry()) {
+      entryNodes.append(node->nodeId());
+    }
+  }
+
+  if (entryNodes.isEmpty() && !nodes.isEmpty()) {
+    // If no entry nodes found, use the first node
+    entryNodes.append(nodes.first()->nodeId());
+  }
+
+  // BFS to assign layers
+  QHash<uint64_t, int> nodeLayers;
+  QHash<int, QList<uint64_t>> layerNodes;
+  QQueue<QPair<uint64_t, int>> queue;
+  QSet<uint64_t> visited;
+
+  for (uint64_t entryId : entryNodes) {
+    queue.enqueue(qMakePair(entryId, 0));
+  }
+
+  while (!queue.isEmpty()) {
+    auto [nodeId, layer] = queue.dequeue();
+
+    if (visited.contains(nodeId)) {
+      continue;
+    }
+    visited.insert(nodeId);
+
+    nodeLayers[nodeId] = layer;
+    layerNodes[layer].append(nodeId);
+
+    for (uint64_t childId : adjacencyList[nodeId]) {
+      if (!visited.contains(childId)) {
+        queue.enqueue(qMakePair(childId, layer + 1));
+      }
+    }
+  }
+
+  // Position unvisited nodes (orphaned nodes)
+  int maxLayer = 0;
+  for (int layer : nodeLayers.values()) {
+    if (layer > maxLayer) {
+      maxLayer = layer;
+    }
+  }
+
+  for (auto *node : nodes) {
+    if (!visited.contains(node->nodeId())) {
+      maxLayer++;
+      nodeLayers[node->nodeId()] = maxLayer;
+      layerNodes[maxLayer].append(node->nodeId());
+    }
+  }
+
+  // Position nodes
+  for (int layer : layerNodes.keys()) {
+    const auto &nodesInLayer = layerNodes[layer];
+    qreal y = startY + layer * verticalSpacing;
+    qreal totalWidth = (nodesInLayer.size() - 1) * horizontalSpacing;
+    qreal x = startX - totalWidth / 2.0;
+
+    for (int i = 0; i < nodesInLayer.size(); ++i) {
+      uint64_t nodeId = nodesInLayer[i];
+      auto *node = m_scene->findNode(nodeId);
+      if (node) {
+        node->setPos(x + i * horizontalSpacing, y);
+      }
+    }
+  }
+
+  // Update all connection paths
+  for (auto *conn : m_scene->connections()) {
+    conn->updatePath();
+  }
+
+  // Fit the graph to view
+  if (m_view) {
+    m_view->centerOnGraph();
   }
 }
 
