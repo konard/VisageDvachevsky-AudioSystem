@@ -275,6 +275,9 @@ private:
   QAction *m_actionCloseProject = nullptr;
   QAction *m_actionExit = nullptr;
 
+  // Project menu
+  QAction *m_actionValidateProject = nullptr;
+
   // Edit menu
   QAction *m_actionUndo = nullptr;
   QAction *m_actionRedo = nullptr;

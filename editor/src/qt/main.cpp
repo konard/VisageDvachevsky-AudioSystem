@@ -13,6 +13,7 @@
  */
 
 #include "NovelMind/core/logger.hpp"
+#include "NovelMind/editor/project_integrity.hpp"
 #include "NovelMind/editor/project_manager.hpp"
 #include "NovelMind/editor/qt/nm_main_window.hpp"
 #include "NovelMind/editor/qt/nm_style_manager.hpp"
@@ -335,8 +336,44 @@ int main(int argc, char *argv[]) {
   QObject::connect(&mainWindow, &NMMainWindow::newProjectRequested,
                    [&runNewProjectDialog]() { runNewProjectDialog(); });
 
+  // Auto-validation helper (light check on project open)
+  auto runAutoValidation = [&mainWindow]() {
+    auto &pm = NovelMind::editor::ProjectManager::instance();
+    if (!pm.hasOpenProject()) {
+      return;
+    }
+
+    // Run quick validation check
+    NovelMind::editor::ProjectIntegrityChecker checker;
+    checker.setProjectPath(pm.getProjectPath());
+    auto report = checker.runQuickCheck();
+
+    // Only show critical or error issues in diagnostics
+    auto *diagnosticsPanel = mainWindow.diagnosticsPanel();
+    int criticalCount = 0;
+    for (const auto &issue : report.issues) {
+      if (issue.severity == NovelMind::editor::IssueSeverity::Critical ||
+          issue.severity == NovelMind::editor::IssueSeverity::Error) {
+        QString type = (issue.severity == NovelMind::editor::IssueSeverity::Critical) ? "Error" : "Error";
+        QString message = QString::fromStdString(issue.message);
+        QString location;
+        if (!issue.filePath.empty()) {
+          location = "File:" + QString::fromStdString(issue.filePath);
+        }
+        diagnosticsPanel->addDiagnosticWithLocation(type, message, location);
+        criticalCount++;
+      }
+    }
+
+    if (criticalCount > 0) {
+      mainWindow.setStatusMessage(
+          QObject::tr("Project validation found %1 issue(s) - check Diagnostics")
+              .arg(criticalCount), 5000);
+    }
+  };
+
   QObject::connect(&mainWindow, &NMMainWindow::openProjectRequested,
-                   [&mainWindow, applyProjectAndRemember]() {
+                   [&mainWindow, applyProjectAndRemember, runAutoValidation]() {
                      const QString path = NMFileDialog::getExistingDirectory(
                          &mainWindow, QObject::tr("Open Project"),
                          QDir::homePath());
@@ -356,6 +393,7 @@ int main(int argc, char *argv[]) {
                      }
 
                      applyProjectAndRemember();
+                     runAutoValidation();
                    });
 
   QObject::connect(&mainWindow, &NMMainWindow::saveProjectRequested,
