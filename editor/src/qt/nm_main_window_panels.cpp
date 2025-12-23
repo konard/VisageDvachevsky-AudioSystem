@@ -19,6 +19,7 @@
 #include "NovelMind/editor/qt/panels/nm_story_graph_panel.hpp"
 #include "NovelMind/editor/qt/panels/nm_timeline_panel.hpp"
 #include "NovelMind/editor/qt/panels/nm_voice_manager_panel.hpp"
+#include "NovelMind/editor/qt/panels/nm_voice_studio_panel.hpp"
 
 #include <QAction>
 #include <QDockWidget>
@@ -53,6 +54,10 @@ void NMMainWindow::setupPanels() {
   m_voiceManagerPanel = new NMVoiceManagerPanel(this);
   m_voiceManagerPanel->setObjectName("VoiceManagerPanel");
   m_voiceManagerPanel->setWindowIcon(iconMgr.getIcon("panel-voice", 16));
+
+  m_voiceStudioPanel = new NMVoiceStudioPanel(this);
+  m_voiceStudioPanel->setObjectName("VoiceStudioPanel");
+  m_voiceStudioPanel->setWindowIcon(iconMgr.getIcon("panel-voice", 16));
 
   m_localizationPanel = new NMLocalizationPanel(this);
   m_localizationPanel->setObjectName("LocalizationPanel");
@@ -116,6 +121,7 @@ void NMMainWindow::setupPanels() {
   addDockWidget(Qt::RightDockWidgetArea, m_inspectorPanel);
   addDockWidget(Qt::RightDockWidgetArea, m_debugOverlayPanel); // Phase 5
   addDockWidget(Qt::RightDockWidgetArea, m_voiceManagerPanel);
+  addDockWidget(Qt::RightDockWidgetArea, m_voiceStudioPanel);
   addDockWidget(Qt::RightDockWidgetArea, m_localizationPanel);
   addDockWidget(Qt::BottomDockWidgetArea, m_timelinePanel);
   addDockWidget(Qt::BottomDockWidgetArea, m_curveEditorPanel);
@@ -142,6 +148,7 @@ void NMMainWindow::setupPanels() {
   // Tab the right panels
   tabifyDockWidget(m_inspectorPanel, m_debugOverlayPanel);
   tabifyDockWidget(m_inspectorPanel, m_voiceManagerPanel);
+  tabifyDockWidget(m_inspectorPanel, m_voiceStudioPanel);
   tabifyDockWidget(m_inspectorPanel, m_localizationPanel);
   tabifyDockWidget(m_inspectorPanel, m_scriptDocPanel);
   m_inspectorPanel->raise();
@@ -182,6 +189,7 @@ void NMMainWindow::configureDocking() {
   configureDock(m_consolePanel);
   configureDock(m_assetBrowserPanel);
   configureDock(m_voiceManagerPanel);
+  configureDock(m_voiceStudioPanel);
   configureDock(m_localizationPanel);
   configureDock(m_timelinePanel);
   configureDock(m_curveEditorPanel);

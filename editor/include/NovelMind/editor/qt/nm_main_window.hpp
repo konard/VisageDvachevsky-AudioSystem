@@ -45,6 +45,7 @@ class NMLocalizationPanel;
 class NMTimelinePanel;
 class NMCurveEditorPanel;
 class NMBuildSettingsPanel;
+class NMVoiceStudioPanel;
 
 /**
  * @brief Main application window for the NovelMind Editor
@@ -128,6 +129,9 @@ public:
   }
   [[nodiscard]] NMBuildSettingsPanel *buildSettingsPanel() const {
     return m_buildSettingsPanel;
+  }
+  [[nodiscard]] NMVoiceStudioPanel *voiceStudioPanel() const {
+    return m_voiceStudioPanel;
   }
 
   // =========================================================================
@@ -282,6 +286,7 @@ private:
   QAction *m_actionToggleDiagnostics = nullptr;
   QAction *m_actionToggleDebugOverlay = nullptr;
   QAction *m_actionToggleVoiceManager = nullptr;
+  QAction *m_actionToggleVoiceStudio = nullptr;
   QAction *m_actionToggleLocalization = nullptr;
   QAction *m_actionToggleTimeline = nullptr;
   QAction *m_actionToggleCurveEditor = nullptr;
@@ -378,6 +383,7 @@ private:
   NMTimelinePanel *m_timelinePanel = nullptr;
   NMCurveEditorPanel *m_curveEditorPanel = nullptr;
   NMBuildSettingsPanel *m_buildSettingsPanel = nullptr;
+  NMVoiceStudioPanel *m_voiceStudioPanel = nullptr;
 
   // =========================================================================
   // State
