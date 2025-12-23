@@ -1,0 +1,34 @@
+// Build Smoke Test - Main Script
+// This is a minimal NMScript file for testing the build pipeline
+
+character Narrator {
+    name: "Narrator"
+    color: "#FFFFFF"
+}
+
+scene intro {
+    // Display a simple message
+    Narrator: "Welcome to the Build Smoke Test!"
+    Narrator: "If you can see this, the build system is working."
+
+    // Show a choice
+    choice {
+        "Continue" -> main
+        "Exit" -> ending
+    }
+}
+
+scene main {
+    Narrator: "This is the main scene."
+    Narrator: "The build system has successfully:"
+    Narrator: "- Compiled this script"
+    Narrator: "- Packaged the resources"
+    Narrator: "- Created the runtime bundle"
+
+    goto ending
+}
+
+scene ending {
+    Narrator: "Thank you for testing!"
+    Narrator: "Build smoke test complete."
+}

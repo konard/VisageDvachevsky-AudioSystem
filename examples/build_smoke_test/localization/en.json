@@ -1,0 +1,12 @@
+{
+  "language": "en",
+  "name": "English",
+  "strings": {
+    "menu.start": "Start",
+    "menu.continue": "Continue",
+    "menu.options": "Options",
+    "menu.exit": "Exit",
+    "dialog.continue": "Click to continue...",
+    "dialog.choice_prompt": "Make your choice:"
+  }
+}
