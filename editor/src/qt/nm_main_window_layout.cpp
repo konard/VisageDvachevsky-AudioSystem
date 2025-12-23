@@ -27,7 +27,98 @@
 namespace NovelMind::editor::qt {
 
 void NMMainWindow::createDefaultLayout() {
-  applyLayoutPreset(LayoutPreset::Scene);
+  // D2: Apply the Default workspace preset on first load
+  applyLayoutPreset(LayoutPreset::Default);
+}
+
+// ============================================================================
+// D2: Workspace Preset System Implementation
+// ============================================================================
+
+void NMMainWindow::applyWorkspacePreset(LayoutPreset preset) {
+  m_currentPreset = preset;
+  applyLayoutPreset(preset);
+
+  // Save the current preset choice
+  QSettings settings("NovelMind", "Editor");
+  settings.setValue("workspace/currentPreset", static_cast<int>(preset));
+}
+
+QString NMMainWindow::currentWorkspacePresetName() const {
+  switch (m_currentPreset) {
+  case LayoutPreset::Default:
+    return tr("Default");
+  case LayoutPreset::StoryScript:
+    return tr("Story / Script");
+  case LayoutPreset::SceneAnimation:
+    return tr("Scene / Animation");
+  case LayoutPreset::AudioVoice:
+    return tr("Audio / Voice");
+  case LayoutPreset::Story:
+    return tr("Story");
+  case LayoutPreset::Scene:
+    return tr("Scene");
+  case LayoutPreset::Script:
+    return tr("Script");
+  case LayoutPreset::Developer:
+    return tr("Developer");
+  case LayoutPreset::Compact:
+    return tr("Compact");
+  }
+  return tr("Custom");
+}
+
+void NMMainWindow::saveWorkspacePreset(const QString &name) {
+  if (name.isEmpty()) {
+    return;
+  }
+
+  QSettings settings("NovelMind", "Editor");
+  settings.beginGroup("workspace/custom/" + name);
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("state", saveState());
+  settings.endGroup();
+
+  setStatusMessage(tr("Workspace preset '%1' saved").arg(name), 2000);
+}
+
+bool NMMainWindow::loadWorkspacePreset(const QString &name) {
+  if (name.isEmpty()) {
+    return false;
+  }
+
+  QSettings settings("NovelMind", "Editor");
+  settings.beginGroup("workspace/custom/" + name);
+  const QByteArray geometry = settings.value("geometry").toByteArray();
+  const QByteArray state = settings.value("state").toByteArray();
+  settings.endGroup();
+
+  if (geometry.isEmpty() || state.isEmpty()) {
+    setStatusMessage(tr("Workspace preset '%1' not found").arg(name), 2000);
+    return false;
+  }
+
+  restoreGeometry(geometry);
+  restoreState(state);
+  setStatusMessage(tr("Workspace preset '%1' loaded").arg(name), 2000);
+  return true;
+}
+
+QStringList NMMainWindow::availableWorkspacePresets() const {
+  QStringList presets;
+
+  // Built-in presets
+  presets << tr("Default") << tr("Story / Script") << tr("Scene / Animation")
+          << tr("Audio / Voice") << tr("Story") << tr("Scene") << tr("Script")
+          << tr("Developer") << tr("Compact");
+
+  // Custom presets from settings
+  QSettings settings("NovelMind", "Editor");
+  settings.beginGroup("workspace/custom");
+  presets << settings.childGroups();
+  settings.endGroup();
+
+  return presets;
 }
 
 void NMMainWindow::focusNextDock(bool reverse) {
@@ -95,7 +186,8 @@ void NMMainWindow::applyLayoutPreset(LayoutPreset preset) {
       m_hierarchyPanel,      m_scriptEditorPanel, m_scriptDocPanel,
       m_playToolbarPanel,    m_debugOverlayPanel, m_issuesPanel,
       m_diagnosticsPanel,    m_voiceManagerPanel, m_localizationPanel,
-      m_timelinePanel,       m_curveEditorPanel,  m_buildSettingsPanel};
+      m_timelinePanel,       m_curveEditorPanel,  m_buildSettingsPanel,
+      m_voiceStudioPanel,    m_audioMixerPanel};
 
   for (auto *dock : docks) {
     if (!dock) {
@@ -114,6 +206,353 @@ void NMMainWindow::applyLayoutPreset(LayoutPreset preset) {
   }
 
   switch (preset) {
+  // ========================================================================
+  // D2: New Workspace Presets
+  // ========================================================================
+
+  case LayoutPreset::Default: {
+    // D2: Default workspace - balanced layout for general editing
+    // Left: Hierarchy, Scene Palette
+    // Center: Scene View (main), Story Graph (tab)
+    // Right: Inspector
+    // Bottom: Console, Asset Browser, Timeline
+
+    if (m_scenePalettePanel)
+      m_scenePalettePanel->show();
+    if (m_hierarchyPanel)
+      m_hierarchyPanel->show();
+    if (m_sceneViewPanel)
+      m_sceneViewPanel->show();
+    if (m_storyGraphPanel)
+      m_storyGraphPanel->show();
+    if (m_inspectorPanel)
+      m_inspectorPanel->show();
+    if (m_consolePanel)
+      m_consolePanel->show();
+    if (m_assetBrowserPanel)
+      m_assetBrowserPanel->show();
+    if (m_timelinePanel)
+      m_timelinePanel->show();
+
+    // Left area
+    if (m_scenePalettePanel) {
+      addDockWidget(Qt::LeftDockWidgetArea, m_scenePalettePanel);
+    }
+    if (m_hierarchyPanel) {
+      addDockWidget(Qt::LeftDockWidgetArea, m_hierarchyPanel);
+    }
+    if (m_scenePalettePanel && m_hierarchyPanel) {
+      tabifyDockWidget(m_scenePalettePanel, m_hierarchyPanel);
+      m_hierarchyPanel->raise();
+    }
+
+    // Center area
+    if (m_sceneViewPanel) {
+      addDockWidget(Qt::TopDockWidgetArea, m_sceneViewPanel);
+      m_sceneViewPanel->raise();
+    }
+    if (m_storyGraphPanel) {
+      addDockWidget(Qt::TopDockWidgetArea, m_storyGraphPanel);
+    }
+    if (m_sceneViewPanel && m_storyGraphPanel) {
+      tabifyDockWidget(m_sceneViewPanel, m_storyGraphPanel);
+      m_sceneViewPanel->raise();
+    }
+
+    // Right area
+    if (m_inspectorPanel) {
+      addDockWidget(Qt::RightDockWidgetArea, m_inspectorPanel);
+    }
+
+    // Bottom area
+    if (m_consolePanel) {
+      addDockWidget(Qt::BottomDockWidgetArea, m_consolePanel);
+    }
+    if (m_assetBrowserPanel) {
+      addDockWidget(Qt::BottomDockWidgetArea, m_assetBrowserPanel);
+    }
+    if (m_timelinePanel) {
+      addDockWidget(Qt::BottomDockWidgetArea, m_timelinePanel);
+    }
+    if (m_consolePanel && m_assetBrowserPanel) {
+      tabifyDockWidget(m_consolePanel, m_assetBrowserPanel);
+    }
+    if (m_consolePanel && m_timelinePanel) {
+      tabifyDockWidget(m_consolePanel, m_timelinePanel);
+    }
+    if (m_assetBrowserPanel) {
+      m_assetBrowserPanel->raise();
+    }
+
+    // Resize
+    if (m_hierarchyPanel) {
+      resizeDocks({m_hierarchyPanel}, {240}, Qt::Horizontal);
+    }
+    if (m_inspectorPanel) {
+      resizeDocks({m_inspectorPanel}, {320}, Qt::Horizontal);
+    }
+    if (m_consolePanel) {
+      resizeDocks({m_consolePanel}, {220}, Qt::Vertical);
+    }
+    break;
+  }
+
+  case LayoutPreset::StoryScript: {
+    // D2: Story/Script focused workspace
+    // Left: Script Documentation
+    // Center: Story Graph (main), Script Editor (tab)
+    // Right: Inspector, Voice Manager, Localization
+    // Bottom: Console, Issues, Diagnostics
+
+    if (m_storyGraphPanel)
+      m_storyGraphPanel->show();
+    if (m_scriptEditorPanel)
+      m_scriptEditorPanel->show();
+    if (m_scriptDocPanel)
+      m_scriptDocPanel->show();
+    if (m_inspectorPanel)
+      m_inspectorPanel->show();
+    if (m_voiceManagerPanel)
+      m_voiceManagerPanel->show();
+    if (m_localizationPanel)
+      m_localizationPanel->show();
+    if (m_consolePanel)
+      m_consolePanel->show();
+    if (m_issuesPanel)
+      m_issuesPanel->show();
+    if (m_diagnosticsPanel)
+      m_diagnosticsPanel->show();
+
+    // Left area
+    if (m_scriptDocPanel) {
+      addDockWidget(Qt::LeftDockWidgetArea, m_scriptDocPanel);
+    }
+
+    // Center area
+    if (m_storyGraphPanel) {
+      addDockWidget(Qt::TopDockWidgetArea, m_storyGraphPanel);
+      m_storyGraphPanel->raise();
+    }
+    if (m_scriptEditorPanel) {
+      addDockWidget(Qt::TopDockWidgetArea, m_scriptEditorPanel);
+    }
+    if (m_storyGraphPanel && m_scriptEditorPanel) {
+      tabifyDockWidget(m_storyGraphPanel, m_scriptEditorPanel);
+      m_storyGraphPanel->raise();
+    }
+
+    // Right area
+    if (m_inspectorPanel) {
+      addDockWidget(Qt::RightDockWidgetArea, m_inspectorPanel);
+    }
+    if (m_voiceManagerPanel) {
+      addDockWidget(Qt::RightDockWidgetArea, m_voiceManagerPanel);
+    }
+    if (m_localizationPanel) {
+      addDockWidget(Qt::RightDockWidgetArea, m_localizationPanel);
+    }
+    if (m_inspectorPanel && m_voiceManagerPanel) {
+      tabifyDockWidget(m_inspectorPanel, m_voiceManagerPanel);
+    }
+    if (m_inspectorPanel && m_localizationPanel) {
+      tabifyDockWidget(m_inspectorPanel, m_localizationPanel);
+    }
+    if (m_inspectorPanel) {
+      m_inspectorPanel->raise();
+    }
+
+    // Bottom area
+    if (m_consolePanel) {
+      addDockWidget(Qt::BottomDockWidgetArea, m_consolePanel);
+    }
+    if (m_issuesPanel) {
+      addDockWidget(Qt::BottomDockWidgetArea, m_issuesPanel);
+    }
+    if (m_diagnosticsPanel) {
+      addDockWidget(Qt::BottomDockWidgetArea, m_diagnosticsPanel);
+    }
+    if (m_consolePanel && m_issuesPanel) {
+      tabifyDockWidget(m_consolePanel, m_issuesPanel);
+    }
+    if (m_consolePanel && m_diagnosticsPanel) {
+      tabifyDockWidget(m_consolePanel, m_diagnosticsPanel);
+    }
+    if (m_consolePanel) {
+      m_consolePanel->raise();
+    }
+
+    // Resize
+    if (m_scriptDocPanel) {
+      resizeDocks({m_scriptDocPanel}, {260}, Qt::Horizontal);
+    }
+    if (m_inspectorPanel) {
+      resizeDocks({m_inspectorPanel}, {300}, Qt::Horizontal);
+    }
+    if (m_consolePanel) {
+      resizeDocks({m_consolePanel}, {180}, Qt::Vertical);
+    }
+    break;
+  }
+
+  case LayoutPreset::SceneAnimation: {
+    // D2: Scene/Animation focused workspace
+    // Left: Hierarchy, Scene Palette
+    // Center: Scene View (main)
+    // Right: Inspector, Curve Editor
+    // Bottom: Timeline (large), Asset Browser
+
+    if (m_sceneViewPanel)
+      m_sceneViewPanel->show();
+    if (m_hierarchyPanel)
+      m_hierarchyPanel->show();
+    if (m_scenePalettePanel)
+      m_scenePalettePanel->show();
+    if (m_inspectorPanel)
+      m_inspectorPanel->show();
+    if (m_curveEditorPanel)
+      m_curveEditorPanel->show();
+    if (m_timelinePanel)
+      m_timelinePanel->show();
+    if (m_assetBrowserPanel)
+      m_assetBrowserPanel->show();
+
+    // Left area
+    if (m_hierarchyPanel) {
+      addDockWidget(Qt::LeftDockWidgetArea, m_hierarchyPanel);
+    }
+    if (m_scenePalettePanel) {
+      addDockWidget(Qt::LeftDockWidgetArea, m_scenePalettePanel);
+    }
+    if (m_hierarchyPanel && m_scenePalettePanel) {
+      tabifyDockWidget(m_hierarchyPanel, m_scenePalettePanel);
+      m_hierarchyPanel->raise();
+    }
+
+    // Center area
+    if (m_sceneViewPanel) {
+      addDockWidget(Qt::TopDockWidgetArea, m_sceneViewPanel);
+      m_sceneViewPanel->raise();
+    }
+
+    // Right area
+    if (m_inspectorPanel) {
+      addDockWidget(Qt::RightDockWidgetArea, m_inspectorPanel);
+    }
+    if (m_curveEditorPanel) {
+      addDockWidget(Qt::RightDockWidgetArea, m_curveEditorPanel);
+    }
+    if (m_inspectorPanel && m_curveEditorPanel) {
+      tabifyDockWidget(m_inspectorPanel, m_curveEditorPanel);
+      m_inspectorPanel->raise();
+    }
+
+    // Bottom area - Timeline gets more space
+    if (m_timelinePanel) {
+      addDockWidget(Qt::BottomDockWidgetArea, m_timelinePanel);
+      m_timelinePanel->raise();
+    }
+    if (m_assetBrowserPanel) {
+      addDockWidget(Qt::BottomDockWidgetArea, m_assetBrowserPanel);
+    }
+    if (m_timelinePanel && m_assetBrowserPanel) {
+      tabifyDockWidget(m_timelinePanel, m_assetBrowserPanel);
+      m_timelinePanel->raise();
+    }
+
+    // Resize
+    if (m_hierarchyPanel) {
+      resizeDocks({m_hierarchyPanel}, {240}, Qt::Horizontal);
+    }
+    if (m_inspectorPanel) {
+      resizeDocks({m_inspectorPanel}, {320}, Qt::Horizontal);
+    }
+    if (m_timelinePanel) {
+      resizeDocks({m_timelinePanel}, {280}, Qt::Vertical);
+    }
+    break;
+  }
+
+  case LayoutPreset::AudioVoice: {
+    // D2 + D6: Audio/Voice focused workspace
+    // Left: Asset Browser (filtered to audio)
+    // Center: Voice Studio (main), Voice Manager (tab)
+    // Right: Inspector, Audio Mixer
+    // Bottom: Console, Diagnostics
+
+    if (m_voiceStudioPanel)
+      m_voiceStudioPanel->show();
+    if (m_voiceManagerPanel)
+      m_voiceManagerPanel->show();
+    if (m_audioMixerPanel)
+      m_audioMixerPanel->show();
+    if (m_assetBrowserPanel)
+      m_assetBrowserPanel->show();
+    if (m_inspectorPanel)
+      m_inspectorPanel->show();
+    if (m_consolePanel)
+      m_consolePanel->show();
+    if (m_diagnosticsPanel)
+      m_diagnosticsPanel->show();
+
+    // Left area - Asset Browser for audio files
+    if (m_assetBrowserPanel) {
+      addDockWidget(Qt::LeftDockWidgetArea, m_assetBrowserPanel);
+    }
+
+    // Center area - Voice tools
+    if (m_voiceStudioPanel) {
+      addDockWidget(Qt::TopDockWidgetArea, m_voiceStudioPanel);
+      m_voiceStudioPanel->raise();
+    }
+    if (m_voiceManagerPanel) {
+      addDockWidget(Qt::TopDockWidgetArea, m_voiceManagerPanel);
+    }
+    if (m_voiceStudioPanel && m_voiceManagerPanel) {
+      tabifyDockWidget(m_voiceStudioPanel, m_voiceManagerPanel);
+      m_voiceStudioPanel->raise();
+    }
+
+    // Right area - Inspector and Audio Mixer
+    if (m_inspectorPanel) {
+      addDockWidget(Qt::RightDockWidgetArea, m_inspectorPanel);
+    }
+    if (m_audioMixerPanel) {
+      addDockWidget(Qt::RightDockWidgetArea, m_audioMixerPanel);
+    }
+    if (m_inspectorPanel && m_audioMixerPanel) {
+      tabifyDockWidget(m_inspectorPanel, m_audioMixerPanel);
+      m_audioMixerPanel->raise();
+    }
+
+    // Bottom area
+    if (m_consolePanel) {
+      addDockWidget(Qt::BottomDockWidgetArea, m_consolePanel);
+    }
+    if (m_diagnosticsPanel) {
+      addDockWidget(Qt::BottomDockWidgetArea, m_diagnosticsPanel);
+    }
+    if (m_consolePanel && m_diagnosticsPanel) {
+      tabifyDockWidget(m_consolePanel, m_diagnosticsPanel);
+      m_consolePanel->raise();
+    }
+
+    // Resize
+    if (m_assetBrowserPanel) {
+      resizeDocks({m_assetBrowserPanel}, {280}, Qt::Horizontal);
+    }
+    if (m_inspectorPanel) {
+      resizeDocks({m_inspectorPanel}, {320}, Qt::Horizontal);
+    }
+    if (m_consolePanel) {
+      resizeDocks({m_consolePanel}, {180}, Qt::Vertical);
+    }
+    break;
+  }
+
+  // ========================================================================
+  // Legacy Presets (maintained for compatibility)
+  // ========================================================================
+
   case LayoutPreset::Story: {
     if (m_storyGraphPanel)
       m_storyGraphPanel->show();

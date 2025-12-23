@@ -172,17 +172,28 @@ void NMMainWindow::setupMenuBar() {
   m_actionToggleDiagnostics->setChecked(true);
   m_actionToggleDiagnostics->setToolTip(tr("Toggle Diagnostics panel"));
 
+  // D6: Audio/Voice panels with improved discoverability
+  m_actionToggleVoiceStudio = panelsMenu->addAction(
+      iconMgr.getIcon("panel-voice", 16), tr("Voice &Studio"));
+  m_actionToggleVoiceStudio->setCheckable(true);
+  m_actionToggleVoiceStudio->setChecked(false);
+  m_actionToggleVoiceStudio->setToolTip(
+      tr("Voice Studio - Record and edit voice lines with waveform visualization (Ctrl+Shift+V)"));
+  m_actionToggleVoiceStudio->setShortcut(QKeySequence("Ctrl+Shift+V"));
+
   m_actionToggleVoiceManager = panelsMenu->addAction(
-      iconMgr.getIcon("panel-voice", 16), tr("&Voice Manager"));
+      iconMgr.getIcon("panel-voice", 16), tr("Voice &Manager"));
   m_actionToggleVoiceManager->setCheckable(true);
   m_actionToggleVoiceManager->setChecked(true);
-  m_actionToggleVoiceManager->setToolTip(tr("Toggle Voice Manager panel"));
+  m_actionToggleVoiceManager->setToolTip(
+      tr("Voice Manager - Manage voice files and dialogue line mappings"));
 
   m_actionToggleAudioMixer = panelsMenu->addAction(
       iconMgr.getIcon("panel-voice", 16), tr("&Audio Mixer"));
   m_actionToggleAudioMixer->setCheckable(true);
   m_actionToggleAudioMixer->setChecked(true);
-  m_actionToggleAudioMixer->setToolTip(tr("Toggle Audio Mixer panel"));
+  m_actionToggleAudioMixer->setToolTip(
+      tr("Audio Mixer - Control audio levels and mixing"));
 
   m_actionToggleLocalization = panelsMenu->addAction(
       iconMgr.getIcon("panel-localization", 16), tr("&Localization"));
@@ -246,37 +257,74 @@ void NMMainWindow::setupMenuBar() {
   m_actionFocusIncludeHierarchy->setCheckable(true);
   m_actionFocusIncludeHierarchy->setChecked(true);
 
+  // =========================================================================
+  // D2: Workspace Presets Menu
+  // =========================================================================
   QMenu *workspaceMenu = viewMenu->addMenu(tr("&Workspaces"));
+
+  // D2: New primary workspace presets
+  m_actionLayoutDefault =
+      workspaceMenu->addAction(iconMgr.getIcon("panel-scene", 16),
+                               tr("&Default"));
+  m_actionLayoutDefault->setToolTip(
+      tr("Balanced layout for general editing (Scene, Story, Inspector, Assets)"));
+  m_actionLayoutDefault->setShortcut(QKeySequence("Ctrl+Alt+1"));
+
+  m_actionLayoutStoryScript =
+      workspaceMenu->addAction(iconMgr.getIcon("panel-graph", 16),
+                               tr("Story / &Script"));
+  m_actionLayoutStoryScript->setToolTip(
+      tr("Story graph and script editing (Story Graph, Script Editor, Inspector, Localization)"));
+  m_actionLayoutStoryScript->setShortcut(QKeySequence("Ctrl+Alt+2"));
+
+  m_actionLayoutSceneAnimation =
+      workspaceMenu->addAction(iconMgr.getIcon("panel-timeline", 16),
+                               tr("Scene / &Animation"));
+  m_actionLayoutSceneAnimation->setToolTip(
+      tr("Scene and animation editing (Scene View, Timeline, Curve Editor, Hierarchy)"));
+  m_actionLayoutSceneAnimation->setShortcut(QKeySequence("Ctrl+Alt+3"));
+
+  m_actionLayoutAudioVoice =
+      workspaceMenu->addAction(iconMgr.getIcon("panel-voice", 16),
+                               tr("&Audio / Voice"));
+  m_actionLayoutAudioVoice->setToolTip(
+      tr("Audio and voice management (Voice Studio, Voice Manager, Audio Mixer)"));
+  m_actionLayoutAudioVoice->setShortcut(QKeySequence("Ctrl+Alt+4"));
+
+  workspaceMenu->addSeparator();
+  workspaceMenu->addAction(tr("Legacy Workspaces"))->setEnabled(false);
+
+  // Legacy workspace presets
   m_actionLayoutStory =
       workspaceMenu->addAction(iconMgr.getIcon("panel-graph", 16),
-                               tr("&Story Workspace"));
+                               tr("Stor&y (Legacy)"));
   m_actionLayoutStory->setToolTip(tr("Story Graph + Inspector + Play + Log"));
   m_actionLayoutStory->setShortcut(QKeySequence("Ctrl+1"));
 
   m_actionLayoutScene =
       workspaceMenu->addAction(iconMgr.getIcon("panel-scene", 16),
-                               tr("S&cene Workspace"));
+                               tr("S&cene (Legacy)"));
   m_actionLayoutScene->setToolTip(
       tr("Scene View + Assets + Inspector + Hierarchy"));
   m_actionLayoutScene->setShortcut(QKeySequence("Ctrl+2"));
 
   m_actionLayoutScript =
       workspaceMenu->addAction(iconMgr.getIcon("panel-console", 16),
-                               tr("S&cript Workspace"));
+                               tr("Scr&ipt (Legacy)"));
   m_actionLayoutScript->setToolTip(
       tr("Script Editor + Story Graph + Play"));
   m_actionLayoutScript->setShortcut(QKeySequence("Ctrl+3"));
 
   m_actionLayoutDeveloper =
       workspaceMenu->addAction(iconMgr.getIcon("panel-diagnostics", 16),
-                               tr("&Developer Workspace"));
+                               tr("&Developer (Legacy)"));
   m_actionLayoutDeveloper->setToolTip(
       tr("Scene + Script + Console + Issues + Diagnostics + Debug"));
   m_actionLayoutDeveloper->setShortcut(QKeySequence("Ctrl+4"));
 
   m_actionLayoutCompact =
       workspaceMenu->addAction(iconMgr.getIcon("panel-asset", 16),
-                               tr("&Compact Workspace"));
+                               tr("&Compact (Legacy)"));
   m_actionLayoutCompact->setToolTip(
       tr("Compact layout with more panels visible at once"));
   m_actionLayoutCompact->setShortcut(QKeySequence("Ctrl+5"));
