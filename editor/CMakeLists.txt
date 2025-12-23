@@ -124,6 +124,7 @@ add_library(novelmind_editor STATIC
     src/qt/panels/nm_voice_manager_panel.cpp
     src/qt/panels/nm_recording_studio_panel.cpp
     src/qt/panels/nm_voice_studio_panel.cpp
+    src/qt/panels/nm_audio_mixer_panel.cpp
     src/qt/panels/nm_localization_panel.cpp
     src/qt/panels/nm_diagnostics_panel.cpp
     src/qt/panels/nm_build_settings_panel.cpp
